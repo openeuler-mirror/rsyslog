@@ -1,0 +1,35 @@
+From 4196f125b63ad889c071b25a6a72176be2e31f65 Mon Sep 17 00:00:00 2001
+From: guoxiaoqi <guoxiaoqi2@huawei.com>
+Date: Sat, 26 Jan 2019 12:21:02 +0000
+Subject: [PATCH] rsyslog-8.24.0, ensure parent dir exists when writting log file
+
+reason: rsyslog-8.24.0, ensure parent dir exists when writting log file
+
+Signed-off-by: guoxiaoqi <guoxiaoqi2@huawei.com>
+---
+ tools/omfile.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/tools/omfile.c b/tools/omfile.c
+index c1a5615..30d792a 100644
+--- a/tools/omfile.c
++++ b/tools/omfile.c
+@@ -805,7 +805,14 @@ doWrite(instanceData *__restrict__ const pData, uchar *__restrict__ const pszBuf
+ 
+ 	DBGPRINTF("omfile: write to stream, pData->pStrm %p, lenBuf %d, strt data %.128s\n",
+ 		  pData->pStrm, lenBuf, pszBuf);
+-	if(pData->pStrm != NULL){
++        if(pData->pStrm != NULL) {
++                if(pData->pStrm->fd == -1 && access((char*)pData->fname, F_OK)) {
++                        if(makeFileParentDirs(pData->fname, ustrlen(pData->fname),
++                                pData->fDirCreateMode, pData->dirUID,
++                                pData->dirGID, pData->bFailOnChown) != 0) {
++                                        ABORT_FINALIZE(RS_RET_ERR); /* we give up */
++                        }
++                }
+ 		CHKiRet(strm.Write(pData->pStrm, pszBuf, lenBuf));
+ 		if(pData->useSigprov) {
+ 			CHKiRet(pData->sigprov.OnRecordWrite(pData->sigprovFileData, pszBuf, lenBuf));
+-- 
+1.8.3.1
+

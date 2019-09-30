@@ -1,0 +1,59 @@
+From 8645960b76db8ff5986efc60f7d2b77b8c5c0094 Mon Sep 17 00:00:00 2001
+From: guoxiaoqi <guoxiaoqi2@huawei.com>
+Date: Sat, 26 Jan 2019 12:37:59 +0000
+Subject: [PATCH] add monotonic timestamp for bugfix of rsyslog-7.4.7 imjournal
+
+reason: add monotonic timestamp for bugfix of rsyslog-7.4.7 imjournal
+
+Signed-off-by: guoxiaoqi <guoxiaoqi2@huawei.com>
+---
+ plugins/imjournal/imjournal.c | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/imjournal/imjournal.c b/plugins/imjournal/imjournal.c
+index 4396ddd..ffafa1f 100644
+--- a/plugins/imjournal/imjournal.c
++++ b/plugins/imjournal/imjournal.c
+@@ -281,6 +281,7 @@ readjournal(void)
+ 
+ 	struct timeval tv;
+ 	uint64_t timestamp;
++	uint64_t monotonic_timestamp;
+ 
+ 	struct json_object *json = NULL;
+ 	int r;
+@@ -291,6 +292,9 @@ readjournal(void)
+ 	char *sys_iden_help = NULL;
+ 	char *c = NULL;
+ 
++	char *t;
++	char *tpmessage;
++
+ 	const void *get;
+ 	const void *pidget;
+ 	size_t length;
+@@ -443,8 +447,19 @@ readjournal(void)
+ 		}
+ 	}
+ 
+-	/* submit message */
+-	enqMsg((uchar *)message, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
++	if (sd_journal_get_data(j, "_SOURCE_MONOTONIC_TIMESTAMP", &get, &length) >= 0)
++	{
++	       t = strndup(get+28, length-28);
++	       monotonic_timestamp = atoll(t);
++	       free(t);
++	       tpmessage = (char *)malloc(strlen(message)+30);
++	       int ret = sprintf(tpmessage,"[%5lu.%06lu] ",monotonic_timestamp/1000000, monotonic_timestamp%1000000);
++	       memcpy(tpmessage+(ret > 30 ? 0 :(ret < 0 ? 0:ret)),message,strlen(message)+1);
++	       enqMsg((uchar *)tpmessage, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
++	       free(tpmessage);
++	}else
++	       /* submit message */
++	       enqMsg((uchar *)message, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
+ 
+ finalize_it:
+ 	free(sys_iden_help);
+-- 
+1.8.3.1
+

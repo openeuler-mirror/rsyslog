@@ -1,0 +1,77 @@
+From 80b2f2cb20cd72b4ce5e2d646f2fa9d6abd3f31d Mon Sep 17 00:00:00 2001
+From: liufeng <liufeng111@huawei.com>
+Date: Mon, 1 Jul 2019 12:20:02 +0800
+Subject: [PATCH] initialize variables and check return value to eliminate warnings
+
+reason: initialize variables and check return value to eliminate warnings
+
+Signed-off-by: liufeng <liufeng111@huawei.com>
+---
+ plugins/imjournal/imjournal.c | 22 +++++++++++++---------
+ tools/rsyslogd.c              |  2 +-
+ 2 files changed, 14 insertions(+), 10 deletions(-)
+
+diff --git a/plugins/imjournal/imjournal.c b/plugins/imjournal/imjournal.c
+index 2eb42a6..87c251a 100644
+--- a/plugins/imjournal/imjournal.c
++++ b/plugins/imjournal/imjournal.c
+@@ -281,7 +281,7 @@ readjournal(void)
+ 
+ 	struct timeval tv;
+ 	uint64_t timestamp;
+-	uint64_t monotonic_timestamp;
++	uint64_t monotonic_timestamp = 0;
+ 
+ 	struct json_object *json = NULL;
+ 	int r;
+@@ -292,8 +292,8 @@ readjournal(void)
+ 	char *sys_iden_help = NULL;
+ 	char *c = NULL;
+ 
+-	char *t;
+-	char *tpmessage;
++	char *t = NULL;
++	char *tpmessage = NULL;
+ 
+ 	const void *get;
+ 	const void *pidget;
+@@ -450,13 +450,17 @@ readjournal(void)
+ 	if (sd_journal_get_data(j, "_SOURCE_MONOTONIC_TIMESTAMP", &get, &length) >= 0)
+ 	{
+ 	       t = strndup(get+28, length-28);
+-	       monotonic_timestamp = atoll(t);
+-	       free(t);
++	       if (t != NULL) {
++		       monotonic_timestamp = atoll(t);
++		       free(t);
++	       }
+ 	       tpmessage = (char *)malloc(strlen(message)+30);
+-	       int ret = sprintf(tpmessage,"[%5lu.%06lu] ",monotonic_timestamp/1000000, monotonic_timestamp%1000000);
+-	       memcpy(tpmessage+(ret > 30 ? 0 :(ret < 0 ? 0:ret)),message,strlen(message)+1);
+-	       enqMsg((uchar *)tpmessage, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
+-	       free(tpmessage);
++	       if (tpmessage != NULL) {
++		       int ret = sprintf(tpmessage,"[%5lu.%06lu] ",monotonic_timestamp/1000000, monotonic_timestamp%1000000);
++		       memcpy(tpmessage+(ret > 30 ? 0 :(ret < 0 ? 0:ret)),message,strlen(message)+1);
++		       enqMsg((uchar *)tpmessage, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
++		       free(tpmessage);
++	       }
+ 	}else
+ 	       /* submit message */
+ 	       enqMsg((uchar *)message, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
+diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
+index 10a8a05..bacc218 100644
+--- a/tools/rsyslogd.c
++++ b/tools/rsyslogd.c
+@@ -236,7 +236,7 @@ static rsRetVal
+ writePidFile(void)
+ {
+ 	FILE *fp;
+-	int fd;
++	int fd = -1;
+ 	DEFiRet;
+ 
+ 	const char *tmpPidFile;
+-- 
+1.8.3.1
+
