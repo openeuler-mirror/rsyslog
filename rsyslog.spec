@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.1907.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -246,7 +246,8 @@ done
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog README.md
+%doc ChangeLog README.md
+%license AUTHORS
 %doc %{rsyslog_docdir}/html
 %doc %{rsyslog_docdir}/mysql-createDB.sql
 %doc %{rsyslog_docdir}/pgsql-createDB.sql
@@ -350,5 +351,11 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
-* Tue Sep 10 2019 openEuler Buildteam <buildteam@openeuler.org> - version-release
+* Fri Oct 18 2019 chengquan <chengquan3@huawei.com> - 8.1907.0-2
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix spec rule in openeuler
+
+* Tue Sep 10 2019 openEuler Buildteam <buildteam@openeuler.org> - 8.1907.0-1
 - Package init
