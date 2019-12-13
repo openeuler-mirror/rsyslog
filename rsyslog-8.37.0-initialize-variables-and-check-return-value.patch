@@ -52,7 +52,7 @@ index 2eb42a6..87c251a 100644
 -	       free(tpmessage);
 +	       if (tpmessage != NULL) {
 +		       int ret = sprintf(tpmessage,"[%5lu.%06lu] ",monotonic_timestamp/1000000, monotonic_timestamp%1000000);
-+		       memcpy(tpmessage+(ret > 30 ? 0 :(ret < 0 ? 0:ret)),message,strlen(message)+1);
++		       memcpy(tpmessage+(ret >= 30 ? 0 :(ret < 0 ? 0:ret)),message,strlen(message)+1);
 +		       enqMsg((uchar *)tpmessage, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
 +		       free(tpmessage);
 +	       }

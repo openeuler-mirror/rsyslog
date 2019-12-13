@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.1907.0
-Release:        2
+Release:        4
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -17,21 +17,27 @@ Source5:        os_rotate_and_save_log.sh
 Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
 
+Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
+Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
+Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
+Patch9003:      uvp-security-rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
+Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
+
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
 BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 systemd-devel >= 204-8
 BuildRequires:  libdbi-devel mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
-Requires:       logrotate >= 3.5.2 bash >= 2.0 libdbi mariadb-connector-c-devel
+Requires:       logrotate >= 3.5.2 bash >= 2.0 libdbi
 %{?systemd_requires}
 
 Provides:       syslog
 Obsoletes:      sysklogd < 1.5-11
 Provides:       rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
 Provides:       rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-libdbi rsyslog-mysql
-Provides:       rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof 
+Provides:       rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 Obsoletes:      rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
 Obsoletes:      rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-libdbi rsyslog-mysql
-Obsoletes:      rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof 
+Obsoletes:      rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 
 %description
 RSYSLOG is the rocket-fast system for log processing.It offers high-performance,
@@ -96,7 +102,7 @@ Requires: %name = %version-%release
 BuildRequires: qpid-proton-c-devel
 
 %description omamqp1
-The omamqp1 output module can be used to send log messages via an AMQP 
+The omamqp1 output module can be used to send log messages via an AMQP
 1.0-compatible messaging bus.
 
 %package pgsql
@@ -136,7 +142,7 @@ protocol.
 rm -r LICENSE README.md source build/objects.inv
 mv build doc
 
-%autosetup -n %{name}-%{version} -D
+%autosetup -n %{name}-%{version} -D -p1
 
 %build
 autoreconf -vfi
@@ -351,6 +357,18 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Wed Nov 27 2019 chengquan <chengquan3@huawei.com> - 8.1907.0-4
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:remove useless install dependencies
+
+* Fri Nov 8 2019 chengquan <chengquan3@huawei.com> - 8.1907.0-3
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add self-study patches
+
 * Fri Oct 18 2019 chengquan <chengquan3@huawei.com> - 8.1907.0-2
 - Type:bugfix
 - ID:NA
