@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.1907.0
-Release:        4
+Release:        5
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -357,6 +357,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 8.1907.0-5
+- del unuse info
+
 * Wed Nov 27 2019 chengquan <chengquan3@huawei.com> - 8.1907.0-4
 - Type:bugfix
 - ID:NA

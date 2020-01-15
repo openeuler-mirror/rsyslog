@@ -4,7 +4,12 @@
 /var/log/secure
 /var/log/spooler
 {
+    maxage 365
+    rotate 30
+    notifempty
+    copytruncate
     missingok
+    size +4096k
     sharedscripts
     postrotate
         /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
