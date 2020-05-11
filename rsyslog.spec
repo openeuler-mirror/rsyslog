@@ -3,8 +3,8 @@
 %define rsyslog_docdir %{_docdir}/rsyslog
 
 Name:           rsyslog
-Version:        8.1907.0
-Release:        5
+Version:        8.2002.0
+Release:        1
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -25,7 +25,7 @@ Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
-BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 systemd-devel >= 204-8
+BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 systemd-devel >= 204-8 python-sphinx
 BuildRequires:  libdbi-devel mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
 Requires:       logrotate >= 3.5.2 bash >= 2.0 libdbi
 %{?systemd_requires}
@@ -139,8 +139,12 @@ protocol.
 
 %prep
 %setup -q -a 1 -T -c
+cd %{name}-doc-%{version}
+sphinx-build -b html source buils
+
 rm -r LICENSE README.md source build/objects.inv
-mv build doc
+cd -
+mv %{name}-%{version}/build doc
 
 %autosetup -n %{name}-%{version} -D -p1
 
@@ -352,6 +356,7 @@ done
 %{_libdir}/rsyslog/omrelp.so
 
 %files help
+%doc %{rsyslog_docdir}/html
 %{_mandir}/man5/rsyslog.conf.5.gz
 %{_mandir}/man8/rsyslogd.8.gz
 %{_mandir}/man1/rscryutil.1.gz
