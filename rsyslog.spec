@@ -140,11 +140,10 @@ protocol.
 %prep
 %setup -q -a 1 -T -c
 cd %{name}-doc-%{version}
-sphinx-build -b html source buils
-
-rm -r LICENSE README.md source build/objects.inv
+sphinx-build -b html source build
+rm -r LICENSE README.md source
 cd -
-mv %{name}-%{version}/build doc
+mv %{name}-doc-%{version}/build doc
 
 %autosetup -n %{name}-%{version} -D -p1
 
@@ -362,6 +361,42 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Apr 16 2020 Shouping Wang<wangshouping@huawei.com> - 8.2002.0-1
+- Type: bugfix
+- ID:NA
+- SUG:restart
+- DESC: upgrade rsyslog to 8.2002.0
+
+* Wed Mar 25 2020 Shouping Wang<wangshouping@huawei.com> - 8.1907.0-5.h5
+- Type:bugfix
+- ID:NA
+- SUG:restart
+- DESC: the return value judgment of recv() is err in CheckConnection
+
+* Tue Mar 24 2020 Shouping Wang<wangshouping@huawei.com> - 8.1907.0-5.h4
+- Type:bugfix
+- ID:NA
+- SUG:restart
+- DESC: parameter streamdriver.permitexpiredcerts did not work
+
+* Thu Mar 19 2020 Shouping Wang<wangshouping@huawei.com> - 8.1907.0-5.h3
+- Type:bugfix
+- ID:NA
+- SUG:restart
+- DESC: del imjournalRatelimitInterval and add *.emerg
+
+* Sat Mar 7 2020 Shouping Wang<wangshouping@huawei.com> - 8.1907.0-5.h2
+- Type:bugfix
+- ID:NA
+- SUG:restart
+- DESC:emergency messages not to everyone
+
+* Fri Mar 6 2020 Shouping Wang<wangshouping@huawei.com> - 8.1907.0-5.h1
+- Type:bugfix
+- ID:NA
+- SUG:restart
+- DESC:create pid file
+
 * Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 8.1907.0-5
 - del unuse info
 
