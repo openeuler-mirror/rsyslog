@@ -1,32 +1,30 @@
-From 80b2f2cb20cd72b4ce5e2d646f2fa9d6abd3f31d Mon Sep 17 00:00:00 2001
-From: liufeng <liufeng111@huawei.com>
-Date: Mon, 1 Jul 2019 12:20:02 +0800
-Subject: [PATCH] initialize variables and check return value to eliminate warnings
+From 9a137580322bd863a48479755aee9c30d0a084e9 Mon Sep 17 00:00:00 2001
+From: wangshouping <wangshouping@huawei.com>
+Date: Wed, 15 Apr 2020 03:07:55 -0400
+Subject: [PATCH] rsyslog-8.37.0-initialize-variables-and-check-return-value
 
-reason: initialize variables and check return value to eliminate warnings
-
-Signed-off-by: liufeng <liufeng111@huawei.com>
+Signed-off-by: wangshouping <wangshouping@huawei.com>
 ---
  plugins/imjournal/imjournal.c | 22 +++++++++++++---------
  tools/rsyslogd.c              |  2 +-
  2 files changed, 14 insertions(+), 10 deletions(-)
 
 diff --git a/plugins/imjournal/imjournal.c b/plugins/imjournal/imjournal.c
-index 2eb42a6..87c251a 100644
+index 3a93b37..1656de7 100644
 --- a/plugins/imjournal/imjournal.c
 +++ b/plugins/imjournal/imjournal.c
-@@ -281,7 +281,7 @@ readjournal(void)
+@@ -386,7 +386,7 @@ readjournal(void)
  
  	struct timeval tv;
  	uint64_t timestamp;
 -	uint64_t monotonic_timestamp;
 +	uint64_t monotonic_timestamp = 0;
  
- 	struct json_object *json = NULL;
+ 	struct fjson_object *json = NULL;
  	int r;
-@@ -292,8 +292,8 @@ readjournal(void)
+@@ -396,8 +396,8 @@ readjournal(void)
+ 	char *sys_iden;
  	char *sys_iden_help = NULL;
- 	char *c = NULL;
  
 -	char *t;
 -	char *tpmessage;
@@ -35,8 +33,8 @@ index 2eb42a6..87c251a 100644
  
  	const void *get;
  	const void *pidget;
-@@ -450,13 +450,17 @@ readjournal(void)
- 	if (sd_journal_get_data(j, "_SOURCE_MONOTONIC_TIMESTAMP", &get, &length) >= 0)
+@@ -508,13 +508,17 @@ readjournal(void)
+ 	if (journalGetData("_SOURCE_MONOTONIC_TIMESTAMP", &get, &length) >= 0)
  	{
  	       t = strndup(get+28, length-28);
 -	       monotonic_timestamp = atoll(t);
@@ -60,10 +58,10 @@ index 2eb42a6..87c251a 100644
  	       /* submit message */
  	       enqMsg((uchar *)message, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
 diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
-index 10a8a05..bacc218 100644
+index 6b531b1..7832693 100644
 --- a/tools/rsyslogd.c
 +++ b/tools/rsyslogd.c
-@@ -236,7 +236,7 @@ static rsRetVal
+@@ -266,7 +266,7 @@ static rsRetVal
  writePidFile(void)
  {
  	FILE *fp;
@@ -73,5 +71,5 @@ index 10a8a05..bacc218 100644
  
  	const char *tmpPidFile;
 -- 
-1.8.3.1
+2.19.1
 
