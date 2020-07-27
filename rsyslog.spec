@@ -3,7 +3,7 @@
 %define rsyslog_docdir %{_docdir}/rsyslog
 
 Name:           rsyslog
-Version:        8.2002.0
+Version:        8.2006.0
 Release:        1
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
@@ -139,11 +139,9 @@ protocol.
 
 %prep
 %setup -q -a 1 -T -c
-cd %{name}-doc-%{version}
 sphinx-build -b html source build
 rm -r LICENSE README.md source
-cd -
-mv %{name}-doc-%{version}/build doc
+mv build doc
 
 %autosetup -n %{name}-%{version} -D -p1
 
@@ -361,6 +359,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon Jul 27 2020 shixuantong<shixuantong@huawei.com> - 8.2006.0-1
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:update to 8.2006-1
+
 * Thu Apr 16 2020 Shouping Wang<wangshouping@huawei.com> - 8.2002.0-1
 - Type: bugfix
 - ID:NA
