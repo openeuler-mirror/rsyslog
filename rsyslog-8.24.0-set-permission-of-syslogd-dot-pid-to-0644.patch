@@ -1,0 +1,44 @@
+From 1b1efc640a57a757d1c7c64fd60d2187e3940060 Mon Sep 17 00:00:00 2001
+From: guoxiaoqi <guoxiaoqi2@huawei.com>
+Date: Sat, 26 Jan 2019 15:27:29 +0000
+Subject: [PATCH] rsyslog-8.24.0, set permission of syslogd dot pid to 0644
+
+reason: rsyslog-8.24.0, set permission of syslogd dot pid to 0644
+
+Signed-off-by: guoxiaoqi <guoxiaoqi2@huawei.com>
+---
+ tools/rsyslogd.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
+index ccc114b..1f1328e 100644
+--- a/tools/rsyslogd.c
++++ b/tools/rsyslogd.c
+@@ -28,6 +28,7 @@
+ #include <sys/types.h>
+ #include <sys/wait.h>
+ #include <unistd.h>
++#include <fcntl.h>
+ #include <errno.h>
+ #ifdef ENABLE_LIBLOGGING_STDLOG
+ #  include <liblogging/stdlog.h>
+@@ -265,6 +266,7 @@ static rsRetVal
+ writePidFile(void)
+ {
+ 	FILE *fp;
++	int fd;
+ 	DEFiRet;
+ 
+ 	const char *tmpPidFile;
+@@ -278,7 +280,8 @@ writePidFile(void)
+ 	if(tmpPidFile == NULL)
+ 		tmpPidFile = PidFile;
+ 	DBGPRINTF("rsyslogd: writing pidfile '%s'.\n", tmpPidFile);
+-	if((fp = fopen((char*) tmpPidFile, "w")) == NULL) {
++        if ( ((fd = open(tmpPidFile, O_WRONLY|O_CREAT|O_CLOEXEC, 0644)) == -1)
++                        || ((fp = fdopen(fd, "w")) == NULL) ) {
+ 		perror("rsyslogd: error writing pid file (creation stage)\n");
+ 		ABORT_FINALIZE(RS_RET_ERR);
+ 	}
+-- 
+2.19.1
