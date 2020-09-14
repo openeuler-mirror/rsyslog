@@ -7,11 +7,11 @@ reason: rsyslog-8.24.0, set permission of syslogd dot pid to 0644
 
 Signed-off-by: guoxiaoqi <guoxiaoqi2@huawei.com>
 ---
- tools/rsyslogd.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ tools/rsyslogd.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
-index ccc114b..1f1328e 100644
+index d2e4833..834fc08 100644
 --- a/tools/rsyslogd.c
 +++ b/tools/rsyslogd.c
 @@ -28,6 +28,7 @@
@@ -30,15 +30,23 @@ index ccc114b..1f1328e 100644
  	DEFiRet;
  
  	const char *tmpPidFile;
-@@ -278,7 +280,8 @@ writePidFile(void)
+@@ -278,10 +280,15 @@ writePidFile(void)
  	if(tmpPidFile == NULL)
  		tmpPidFile = PidFile;
  	DBGPRINTF("rsyslogd: writing pidfile '%s'.\n", tmpPidFile);
 -	if((fp = fopen((char*) tmpPidFile, "w")) == NULL) {
-+        if ( ((fd = open(tmpPidFile, O_WRONLY|O_CREAT|O_CLOEXEC, 0644)) == -1)
-+                        || ((fp = fdopen(fd, "w")) == NULL) ) {
++	if ( (fd = open(tmpPidFile, O_WRONLY|O_CREAT|O_CLOEXEC, 0644)) == -1)
  		perror("rsyslogd: error writing pid file (creation stage)\n");
  		ABORT_FINALIZE(RS_RET_ERR);
  	}
++	if ((fp = fdopen(fd, "w")) == NULL) {
++		close(fd);
++		perror("rsyslogd: error writing pid file (fp binding stage)\n");
++		ABORT_FINALIZE(RS_RET_ERR);
++	}
+ 	if(fprintf(fp, "%d", (int) glblGetOurPid()) < 0) {
+ 		LogError(errno, iRet, "rsyslog: error writing pid file");
+ 	}
 -- 
-2.19.1
+1.8.3.1
+
