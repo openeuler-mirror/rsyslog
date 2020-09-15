@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -20,7 +20,7 @@ Source7:        timezone.cron
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
 Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
-Patch9003:      uvp-security-rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
+Patch9003:      rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
 Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
@@ -359,6 +359,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Sep 15 2020 Guodong Zhu<zhuguodong8@huawei.com> - 8.2006.0-2
+- Type:NA
+- ID:NA
+- SUG:restart
+- DESC: fix potential file descriptor leak in one backport patch
+
 * Mon Jul 27 2020 shixuantong<shixuantong@huawei.com> - 8.2006.0-1
 - Type:NA
 - ID:NA
