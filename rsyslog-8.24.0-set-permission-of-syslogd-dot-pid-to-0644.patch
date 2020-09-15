@@ -35,7 +35,7 @@ index d2e4833..834fc08 100644
  		tmpPidFile = PidFile;
  	DBGPRINTF("rsyslogd: writing pidfile '%s'.\n", tmpPidFile);
 -	if((fp = fopen((char*) tmpPidFile, "w")) == NULL) {
-+	if ( (fd = open(tmpPidFile, O_WRONLY|O_CREAT|O_CLOEXEC, 0644)) == -1)
++	if ( (fd = open(tmpPidFile, O_WRONLY|O_CREAT|O_CLOEXEC, 0644)) == -1) {
  		perror("rsyslogd: error writing pid file (creation stage)\n");
  		ABORT_FINALIZE(RS_RET_ERR);
  	}
