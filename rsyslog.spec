@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -357,6 +357,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon Sep 14 2020 zhuguodong<zhuguodong8@huawei.com> - 8.2006.0-2
+- Type: bugfix
+- ID:NA
+- SUG:restart
+- DESC: fix potential file descriptor leak in one backport patch.
+
 * Fri Jul 31 2020 zhuguodong<zhuguodong8@huawei.com> - 8.2006.0-1
 - Type: bugfix
 - ID:NA
