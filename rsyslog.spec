@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -28,6 +28,7 @@ BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel
 BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 systemd-devel >= 204-8
 BuildRequires:  libdbi-devel mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
 Requires:       logrotate >= 3.5.2 bash >= 2.0 libdbi
+Requires:       %{name}-help = %{version}
 %{?systemd_requires}
 
 Provides:       syslog
@@ -357,6 +358,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Fri Nov 6 2020 wangjie<wangjie294@huawei.com> - 8.2006.0-2
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:Adding help package to the installation dependency of the main package
+
 * Fri Jul 31 2020 zhuguodong<zhuguodong8@huawei.com> - 8.2006.0-1
 - Type: bugfix
 - ID:NA
