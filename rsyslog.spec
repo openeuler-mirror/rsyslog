@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        3
+Release:        4
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -26,18 +26,18 @@ Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
 BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 systemd-devel >= 204-8
-BuildRequires:  libdbi-devel mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
-Requires:       logrotate >= 3.5.2 bash >= 2.0 libdbi
+BuildRequires:  mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
+Requires:       logrotate >= 3.5.2 bash >= 2.0
 Recommends:       %{name}-help = %{version}-%{release}
 %{?systemd_requires}
 
 Provides:       syslog
 Obsoletes:      sysklogd < 1.5-11
 Provides:       rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
-Provides:       rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-libdbi rsyslog-mysql
+Provides:       rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql
 Provides:       rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 Obsoletes:      rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
-Obsoletes:      rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-libdbi rsyslog-mysql
+Obsoletes:      rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql
 Obsoletes:      rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 
 %description
@@ -170,7 +170,6 @@ export HIREDIS_LIBS="-L%{_libdir} -lhiredis"
 	--enable-imjournal \
 	--enable-impstats \
 	--enable-imptcp \
-	--enable-libdbi \
 	--enable-mail \
 	--enable-mmanon \
 	--enable-mmaudit \
@@ -303,7 +302,6 @@ done
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omelasticsearch.so
 %{_libdir}/rsyslog/omgssapi.so
-%{_libdir}/rsyslog/omlibdbi.so
 %{_libdir}/rsyslog/omjournal.so
 %{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omprog.so
@@ -358,6 +356,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Fri Jan 8 2020 shangyibin<shangyibin1@huawei.com> - 8.2006.0-4
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:Cancel the dependency on libdbi.
+
 * Fri Nov 13 2020 shangyibin<shangyibin1@huawei.com> - 8.2006.0-3
 - Type:NA
 - ID:NA
