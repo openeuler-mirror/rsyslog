@@ -1,0 +1,26 @@
+From de0750c6c28b76be9573bc08386bc2fad54b80a1 Mon Sep 17 00:00:00 2001
+From: Kalle Kankare <kalle.kankare@vincit.fi>
+Date: Mon, 11 Nov 2019 10:01:36 +0200
+Subject: [PATCH 60/73] core/network: obey net.enableDNS=off when querying
+ local hostname
+
+---
+ runtime/net.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/runtime/net.c b/runtime/net.c
+index e503810c5..d98395a77 100644
+--- a/runtime/net.c
++++ b/runtime/net.c
+@@ -1186,7 +1186,7 @@ getLocalHostname(uchar **ppName)
+ 
+ 	char *dot = strstr(hnbuf, ".");
+ 	struct addrinfo *res = NULL;
+-	if(!empty_hostname && dot == NULL) {
++	if(!empty_hostname && dot == NULL && !glbl.GetDisableDNS()) {
+ 		/* we need to (try) to find the real name via resolver */
+ 		struct addrinfo flags;
+ 		memset(&flags, 0, sizeof(flags));
+-- 
+2.23.0
+

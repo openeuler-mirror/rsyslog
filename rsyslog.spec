@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        4
+Release:        5
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -17,11 +17,28 @@ Source5:        os_rotate_and_save_log.sh
 Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
 
+Patch6000:      backport-testbench-set-msg-size-to-64kb-for-sndrcv_omudpspoof.patch
+Patch6001:      backport-FIX-IMUDP-add-missing-free-during-freeCnf.patch
+Patch6002:      backport-gnutls-Propagate-CheckExtendedKeyPurpose-when-accept.patch
+Patch6003:      backport-Add-max-sessions-for-imptcp.c-similar-to-imtcp.c.patch
+Patch6004:      backport-omelasticsearch-Fix-reply-buffer-reset-after-health-.patch
+Patch6005:      backport-config-bugfix-intended-warning-emitted-as-error.patch
+Patch6006:      backport-core-bugfix-segfault-if-disk-queue-file-cannot-be-cr.patch
+Patch6007:      backport-imtcp-bugfix-broken-connection-not-necessariy-detect.patch
+Patch6008:      backport-core-bugfix-potential-segfault-on-querey-of-PROGRAMN.patch
+Patch6009:      backport-Replaced-eCmdHdlrPositiveInt-with-eCmdHdlrNonNegInt-.patch
+Patch6010:      backport-Replace-GNUTLS_SHUT_RDWR-by-GNUTLS_SHUT_WR-when-endi.patch
+Patch6011:      backport-core-network-obey-net.enableDNS-off-when-querying-lo.patch
+Patch6012:      backport-Do-not-create-empty-objects-when-accessing-non-exist.patch
+Patch6013:      backport-gnutls-Added-handshake-error-handling-into-doRetry-h.patch
+Patch6014:      backport-msg-segfault-in-jsonPathFindNext-when-root-is-not-an.patch
+Patch6015:      backport-msg-memory-leak-in-msgAddJSON-if-jsonPathFindParent-.patch
+
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
 Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
-Patch9003:      rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
 Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
+Patch9005:      openEuler-rsyslog.service.in-create-PID-file.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -242,6 +259,7 @@ do
 	umask 066 && touch $n
 done
 %systemd_post rsyslog.service
+systemctl daemon-reload >/dev/null 2>&1
 
 %preun
 %systemd_preun rsyslog.service
@@ -356,6 +374,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Fri Jan 15 2020 shangyibin<shangyibin1@huawei.com> - 8.2006.0-5
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:patch round repair.
+
 * Fri Jan 8 2020 shangyibin<shangyibin1@huawei.com> - 8.2006.0-4
 - Type:NA
 - ID:NA

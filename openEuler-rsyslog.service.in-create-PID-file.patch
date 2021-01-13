@@ -1,0 +1,30 @@
+From 540fea48c4fb300b8ec5ebe9a37387460264efef Mon Sep 17 00:00:00 2001
+From: wangshouping <wangshouping@huawei.com>
+Date: Thu, 5 Mar 2020 21:55:21 -0500
+Subject: [PATCH] rsyslog.service.in: create PID file
+
+Signed-off-by: wangshouping <wangshouping@huawei.com>
+---
+ rsyslog.service.in | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/rsyslog.service.in b/rsyslog.service.in
+index b761ae5..2fd89b0 100644
+--- a/rsyslog.service.in
++++ b/rsyslog.service.in
+@@ -6,7 +6,11 @@ Documentation=https://www.rsyslog.com/doc/
+ 
+ [Service]
+ Type=notify
+-ExecStart=@sbindir@/rsyslogd -n -iNONE
++ExecStart=@sbindir@/rsyslogd -n -i/var/run/rsyslogd.pid
++ExecStartPost=/bin/bash /usr/bin/timezone_update.sh
++UMask=0066
++StartLimitBurst=100
++RestartSec=1s
+ StandardOutput=null
+ Restart=on-failure
+ 
+-- 
+2.19.1
+

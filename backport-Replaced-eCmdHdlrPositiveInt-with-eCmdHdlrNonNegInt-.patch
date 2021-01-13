@@ -1,0 +1,133 @@
+From 2e3b767d03f7ee9534a4d93c013a6bc35437ca13 Mon Sep 17 00:00:00 2001
+From: Aaron Levy <aaronmaxlevy@gmail.com>
+Date: Sat, 12 Sep 2020 17:29:44 -0700
+Subject: [PATCH 57/73] Replaced eCmdHdlrPositiveInt with eCmdHdlrNonNegInt
+ where default is 0
+
+---
+ contrib/mmdarwin/mmdarwin.c         | 2 +-
+ contrib/omrabbitmq/omrabbitmq.c     | 2 +-
+ plugins/imfile/imfile.c             | 6 +++---
+ plugins/imtcp/imtcp.c               | 6 +++---
+ runtime/glbl.c                      | 2 +-
+ tests/omrabbitmq_params_invalid3.sh | 4 ++--
+ tools/omfwd.c                       | 6 +++---
+ 7 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/contrib/mmdarwin/mmdarwin.c b/contrib/mmdarwin/mmdarwin.c
+index ea6f4c3ee..e36dbde2c 100644
+--- a/contrib/mmdarwin/mmdarwin.c
++++ b/contrib/mmdarwin/mmdarwin.c
+@@ -124,7 +124,7 @@ static struct cnfparamdescr actpdescr[] = {
+ 	{"filtercode", eCmdHdlrGetWord, 0},			/* optional parameter */
+ 	{"response", eCmdHdlrGetWord, 0},			/* optional parameter */
+ 	{"send_partial", eCmdHdlrBinary, 0},		/* optional parameter */
+-	{"socket_max_use", eCmdHdlrPositiveInt, 0}, /* optional parameter - will disappear in future updates */
++	{"socket_max_use", eCmdHdlrNonNegInt, 0}, /* optional parameter - will disappear in future updates */
+ };
+ static struct cnfparamblk actpblk = {
+ 	CNFPARAMBLK_VERSION,
+diff --git a/contrib/omrabbitmq/omrabbitmq.c b/contrib/omrabbitmq/omrabbitmq.c
+index 12b1ea18e..4d7696459 100644
+--- a/contrib/omrabbitmq/omrabbitmq.c
++++ b/contrib/omrabbitmq/omrabbitmq.c
+@@ -179,7 +179,7 @@ static struct cnfparamdescr actpdescr[] = {
+ 	{ "routing_key", eCmdHdlrGetWord, 0 },
+ 	{ "routing_key_template", eCmdHdlrGetWord, 0 },
+ 	{ "delivery_mode", eCmdHdlrGetWord, 0 },
+-	{ "expiration", eCmdHdlrPositiveInt, 0 },
++	{ "expiration", eCmdHdlrNonNegInt, 0 },
+ 	{ "populate_properties", eCmdHdlrBinary, 0 },
+ 	{ "body_template", eCmdHdlrGetWord, 0 },
+ 	{ "content_type", eCmdHdlrGetWord, 0 },
+diff --git a/plugins/imfile/imfile.c b/plugins/imfile/imfile.c
+index 21d654655..db161cc49 100644
+--- a/plugins/imfile/imfile.c
++++ b/plugins/imfile/imfile.c
+@@ -300,7 +300,7 @@ static prop_t *pInputName = NULL;
+ /* module-global parameters */
+ static struct cnfparamdescr modpdescr[] = {
+ 	{ "pollinginterval", eCmdHdlrPositiveInt, 0 },
+-	{ "readtimeout", eCmdHdlrPositiveInt, 0 },
++	{ "readtimeout", eCmdHdlrNonNegInt, 0 },
+ 	{ "timeoutgranularity", eCmdHdlrPositiveInt, 0 },
+ 	{ "sortfiles", eCmdHdlrBinary, 0 },
+ 	{ "statefile.directory", eCmdHdlrString, 0 },
+@@ -335,11 +335,11 @@ static struct cnfparamdescr inppdescr[] = {
+ 	{ "persiststateinterval", eCmdHdlrInt, 0 },
+ 	{ "persiststateaftersubmission", eCmdHdlrBinary, 0 },
+ 	{ "deletestateonfiledelete", eCmdHdlrBinary, 0 },
+-	{ "delay.message", eCmdHdlrPositiveInt, 0 },
++	{ "delay.message", eCmdHdlrNonNegInt, 0 },
+ 	{ "addmetadata", eCmdHdlrBinary, 0 },
+ 	{ "addceetag", eCmdHdlrBinary, 0 },
+ 	{ "statefile", eCmdHdlrString, CNFPARAM_DEPRECATED },
+-	{ "readtimeout", eCmdHdlrPositiveInt, 0 },
++	{ "readtimeout", eCmdHdlrNonNegInt, 0 },
+ 	{ "freshstarttail", eCmdHdlrBinary, 0},
+ 	{ "filenotfounderror", eCmdHdlrBinary, 0},
+ 	{ "needparse", eCmdHdlrBinary, 0},
+diff --git a/plugins/imtcp/imtcp.c b/plugins/imtcp/imtcp.c
+index a1955d979..f1478dc15 100644
+--- a/plugins/imtcp/imtcp.c
++++ b/plugins/imtcp/imtcp.c
+@@ -180,9 +180,9 @@ static struct cnfparamdescr modpdescr[] = {
+ 	{ "streamdriver.TlsVerifyDepth", eCmdHdlrPositiveInt, 0 },
+ 	{ "permittedpeer", eCmdHdlrArray, 0 },
+ 	{ "keepalive", eCmdHdlrBinary, 0 },
+-	{ "keepalive.probes", eCmdHdlrPositiveInt, 0 },
+-	{ "keepalive.time", eCmdHdlrPositiveInt, 0 },
+-	{ "keepalive.interval", eCmdHdlrPositiveInt, 0 },
++	{ "keepalive.probes", eCmdHdlrNonNegInt, 0 },
++	{ "keepalive.time", eCmdHdlrNonNegInt, 0 },
++	{ "keepalive.interval", eCmdHdlrNonNegInt, 0 },
+ 	{ "gnutlsprioritystring", eCmdHdlrString, 0 },
+ 	{ "preservecase", eCmdHdlrBinary, 0 }
+ };
+diff --git a/runtime/glbl.c b/runtime/glbl.c
+index ce390da4e..714f6226d 100644
+--- a/runtime/glbl.c
++++ b/runtime/glbl.c
+@@ -170,7 +170,7 @@ static struct cnfparamdescr cnfparamdescr[] = {
+ 	{ "preservefqdn", eCmdHdlrBinary, 0 },
+ 	{ "debug.onshutdown", eCmdHdlrBinary, 0 },
+ 	{ "debug.logfile", eCmdHdlrString, 0 },
+-	{ "debug.gnutls", eCmdHdlrPositiveInt, 0 },
++	{ "debug.gnutls", eCmdHdlrNonNegInt, 0 },
+ 	{ "debug.unloadmodules", eCmdHdlrBinary, 0 },
+ 	{ "defaultnetstreamdrivercafile", eCmdHdlrString, 0 },
+ 	{ "defaultnetstreamdriverkeyfile", eCmdHdlrString, 0 },
+diff --git a/tests/omrabbitmq_params_invalid3.sh b/tests/omrabbitmq_params_invalid3.sh
+index 991cb3bee..4274dd9d2 100755
+--- a/tests/omrabbitmq_params_invalid3.sh
++++ b/tests/omrabbitmq_params_invalid3.sh
+@@ -11,6 +11,6 @@ action(type="omfile" file="'$RSYSLOG_OUT_LOG'")
+ startup
+ shutdown_when_empty
+ wait_shutdown
+-content_check "parameter 'expiration' cannot be less than one"
++content_check "parameter 'expiration' cannot be less than zero"
+ 
+-exit_test
+\ No newline at end of file
++exit_test
+diff --git a/tools/omfwd.c b/tools/omfwd.c
+index 74d0c8bed..1304f43f3 100644
+--- a/tools/omfwd.c
++++ b/tools/omfwd.c
+@@ -184,9 +184,9 @@ static struct cnfparamdescr actpdescr[] = {
+ 	{ "maxerrormessages", eCmdHdlrInt, CNFPARAM_DEPRECATED },
+ 	{ "rebindinterval", eCmdHdlrInt, 0 },
+ 	{ "keepalive", eCmdHdlrBinary, 0 },
+-	{ "keepalive.probes", eCmdHdlrPositiveInt, 0 },
+-	{ "keepalive.time", eCmdHdlrPositiveInt, 0 },
+-	{ "keepalive.interval", eCmdHdlrPositiveInt, 0 },
++	{ "keepalive.probes", eCmdHdlrNonNegInt, 0 },
++	{ "keepalive.time", eCmdHdlrNonNegInt, 0 },
++	{ "keepalive.interval", eCmdHdlrNonNegInt, 0 },
+ 	{ "gnutlsprioritystring", eCmdHdlrString, 0 },
+ 	{ "streamdriver", eCmdHdlrGetWord, 0 },
+ 	{ "streamdrivermode", eCmdHdlrInt, 0 },
+-- 
+2.23.0
+

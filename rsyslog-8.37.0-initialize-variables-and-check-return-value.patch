@@ -57,19 +57,6 @@ index 3a93b37..1656de7 100644
  	}else
  	       /* submit message */
  	       enqMsg((uchar *)message, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
-diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
-index 6b531b1..7832693 100644
---- a/tools/rsyslogd.c
-+++ b/tools/rsyslogd.c
-@@ -266,7 +266,7 @@ static rsRetVal
- writePidFile(void)
- {
- 	FILE *fp;
--	int fd;
-+	int fd = -1;
- 	DEFiRet;
- 
- 	const char *tmpPidFile;
 -- 
 2.19.1
 

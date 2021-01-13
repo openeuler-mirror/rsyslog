@@ -1,0 +1,30 @@
+From 24816cd9ddefacd60aa9d7023a71bb24314c5957 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Wed, 26 Aug 2020 13:17:16 +0200
+Subject: [PATCH 37/73] config bugfix: intended warning emitted as error
+
+When there are actions configured after a STOP, a warning should be
+emitted. In fact, an error message is generated. This prevents the
+construct, which may have some legit uses in exotic settings. It
+may also break older configs, but as the message is an error
+for so long now, this should be no longer of concern.
+---
+ grammar/rainerscript.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grammar/rainerscript.c b/grammar/rainerscript.c
+index 2157451a0..34f4804f1 100644
+--- a/grammar/rainerscript.c
++++ b/grammar/rainerscript.c
+@@ -5041,7 +5041,7 @@ cnfstmtOptimize(struct cnfstmt *root)
+ 			break;
+ 		case S_STOP:
+ 			if(stmt->next != NULL)
+-				parser_errmsg("STOP is followed by unreachable statements!\n");
++				parser_warnmsg("STOP is followed by unreachable statements!\n");
+ 			break;
+ 		case S_UNSET: /* nothing to do */
+ 			break;
+-- 
+2.23.0
+

@@ -1,0 +1,30 @@
+From 29afbafcd5950ed31a3831f9f4fbe1649a0ea49b Mon Sep 17 00:00:00 2001
+From: Leo Fang <leofang_94@163.com>
+Date: Wed, 27 May 2020 10:45:29 +0800
+Subject: [PATCH] imtcp bugfix: broken connection not necessariy detected
+
+Due to an invalid return code check, broken TCP sessions could not
+necessarily be detected "right in time". This can result is the loss
+of one message.
+
+closes https://github.com/rsyslog/rsyslog/issues/4227
+---
+ runtime/nsd_ptcp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/runtime/nsd_ptcp.c b/runtime/nsd_ptcp.c
+index de3ab38f9..2b56efdb8 100644
+--- a/runtime/nsd_ptcp.c
++++ b/runtime/nsd_ptcp.c
+@@ -952,7 +952,7 @@ CheckConnection(nsd_t *pNsd)
+ 	ISOBJ_TYPE_assert(pThis, nsd_ptcp);
+ 
+ 	rc = recv(pThis->sock, msgbuf, 1, MSG_DONTWAIT | MSG_PEEK);
+-	if(rc == 0 && errno != EAGAIN) {
++	if(rc == 0) {
+ 		dbgprintf("CheckConnection detected broken connection - closing it (rc %d, errno %d)\n", rc, errno);
+ 		/* in this case, the remote peer had shut down the connection and we
+ 		 * need to close our side, too.
+-- 
+2.23.0
+

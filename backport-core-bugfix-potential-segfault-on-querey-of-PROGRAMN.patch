@@ -1,0 +1,57 @@
+From 6cffa83af3ca1368ab406324fb01d5e1c32af902 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Fri, 11 Sep 2020 13:14:50 +0200
+Subject: [PATCH] core bugfix: potential segfault on querey of PROGRAMNAME
+ property
+
+A data race can happen on variable iLenProgram as it is not guarded
+by the message mutex at time of query. This can lead to it being
+non -1 while the buffer has not yet properly set up.
+
+Thanks to github user wsp1991 for alerting us and a related
+patch proposal.
+
+replaces https://github.com/rsyslog/rsyslog/pull/4300
+---
+ runtime/msg.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/runtime/msg.c b/runtime/msg.c
+index 6468a0d55..3acc4f212 100644
+--- a/runtime/msg.c
++++ b/runtime/msg.c
+@@ -2619,22 +2619,21 @@ MsgGetStructuredData(smsg_t * const pM, uchar **pBuf, rs_size_t *len)
+ uchar * ATTR_NONNULL(1)
+ getProgramName(smsg_t *const pM, const sbool bLockMutex)
+ {
++	if(bLockMutex == LOCK_MUTEX) {
++		MsgLock(pM);
++	}
++
+ 	if(pM->iLenPROGNAME == -1) {
+ 		if(pM->iLenTAG == 0) {
+ 			uchar *pRes;
+ 			rs_size_t bufLen = -1;
+-			getTAG(pM, &pRes, &bufLen, bLockMutex);
++			getTAG(pM, &pRes, &bufLen, MUTEX_ALREADY_LOCKED);
+ 		}
++		aquireProgramName(pM);
++	}
+ 
+-		if(bLockMutex == LOCK_MUTEX) {
+-			MsgLock(pM);
+-			/* need to re-check, things may have change in between! */
+-			if(pM->iLenPROGNAME == -1)
+-				aquireProgramName(pM);
+-			MsgUnlock(pM);
+-		} else {
+-			aquireProgramName(pM);
+-		}
++	if(bLockMutex == LOCK_MUTEX) {
++		MsgUnlock(pM);
+ 	}
+ 	return (pM->iLenPROGNAME < CONF_PROGNAME_BUFSIZE) ? pM->PROGNAME.szBuf
+ 						       : pM->PROGNAME.ptr;
+-- 
+2.23.0
+
