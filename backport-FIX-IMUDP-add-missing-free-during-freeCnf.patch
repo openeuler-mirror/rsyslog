@@ -1,0 +1,24 @@
+From 9df01d03027468d707320d48bd4c0724eaac6aa4 Mon Sep 17 00:00:00 2001
+From: frikilax <theo.bertin@advens.fr>
+Date: Thu, 25 Jun 2020 15:56:06 +0200
+Subject: [PATCH 03/73] FIX::IMUDP: add missing free during freeCnf()
+
+---
+ plugins/imudp/imudp.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/imudp/imudp.c b/plugins/imudp/imudp.c
+index bb6414d4d..4b49e9f12 100644
+--- a/plugins/imudp/imudp.c
++++ b/plugins/imudp/imudp.c
+@@ -1195,6 +1195,7 @@ CODESTARTfreeCnf
+ 		free(inst->pszBindPort);
+ 		free(inst->pszBindAddr);
+ 		free(inst->pszBindDevice);
++		free(inst->pszBindRuleset);
+ 		free(inst->inputname);
+ 		free(inst->dfltTZ);
+ 		del = inst;
+-- 
+2.23.0
+

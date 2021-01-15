@@ -1,0 +1,44 @@
+From 405457374661a81893cc3d9ad041e51ec996a7d1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Renaud=20M=C3=A9trich?= <rmetrich@redhat.com>
+Date: Fri, 18 Sep 2020 15:46:25 +0200
+Subject: [PATCH 59/73] Replace GNUTLS_SHUT_RDWR by GNUTLS_SHUT_WR when ending
+ TLS connections
+
+Some TLS servers don't reply to graceful shutdown requests "for
+optimization". This results in rsyslog's omfwd+gtls client to wait
+forever for a reply of the TLS server which never comes, due to shutting
+down the connection with gnutls_bye(GNUTLS_SHUT_RDWR).
+
+On systemd systems, commands such as "systemctl restart rsyslog" just
+hang for 1m30 and rsyslogd gets killed upon timeout by systemd.
+
+This patch replaces call to gnutls_bye(GNUTLS_SHUT_RDWR) by calls to
+gnutls_bye(GNUTLS_SHUT_WR) which is sufficient and doesn't wait for a
+server reply.
+
+A Red Hat customer reproduces the hang reliably when sending the logs to
+his Kiwi Syslog server, which apparently doesn't send the TLS reply upon
+connection termination request.
+---
+ runtime/nsd_gtls.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/runtime/nsd_gtls.c b/runtime/nsd_gtls.c
+index ac2d9a41a..1cf73dadc 100644
+--- a/runtime/nsd_gtls.c
++++ b/runtime/nsd_gtls.c
+@@ -1321,9 +1321,9 @@ gtlsEndSess(nsd_gtls_t *pThis)
+ 
+ 	if(pThis->bHaveSess) {
+ 		if(pThis->bIsInitiator) {
+-			gnuRet = gnutls_bye(pThis->sess, GNUTLS_SHUT_RDWR);
++			gnuRet = gnutls_bye(pThis->sess, GNUTLS_SHUT_WR);
+ 			while(gnuRet == GNUTLS_E_INTERRUPTED || gnuRet == GNUTLS_E_AGAIN) {
+-				gnuRet = gnutls_bye(pThis->sess, GNUTLS_SHUT_RDWR);
++				gnuRet = gnutls_bye(pThis->sess, GNUTLS_SHUT_WR);
+ 			}
+ 		}
+ 		gnutls_deinit(pThis->sess);
+-- 
+2.23.0
+

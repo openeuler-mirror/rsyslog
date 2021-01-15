@@ -1,0 +1,26 @@
+From 4e5741807e7d237ecfac647bd530fd5e5c970e5d Mon Sep 17 00:00:00 2001
+From: Andre lorbach <alorbach@adiscon.com>
+Date: Mon, 20 Jul 2020 08:35:57 +0200
+Subject: [PATCH] testbench: set msg size to 64kb for
+ sndrcv_omudpspoof-bigmsg.sh test
+
+---
+ tests/sndrcv_omudpspoof-bigmsg.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/sndrcv_omudpspoof-bigmsg.sh b/tests/sndrcv_omudpspoof-bigmsg.sh
+index ee11b0a..6d61793 100755
+--- a/tests/sndrcv_omudpspoof-bigmsg.sh
++++ b/tests/sndrcv_omudpspoof-bigmsg.sh
+@@ -8,7 +8,7 @@ if [ "$EUID" -ne 0 ]; then
+ fi
+ export TCPFLOOD_EXTRA_OPTS="-b1 -W1"
+ export NUMMESSAGES=1
+-export MESSAGESIZE=16384 #65000 #32768 #16384
++export MESSAGESIZE=65000 #65000 #32768 #16384
+ #export RSYSLOG_DEBUG="debug nologfuncflow noprintmutexaction nostdout"
+ #export RSYSLOG_DEBUGLOG="log"
+ 
+-- 
+1.8.3.1
+

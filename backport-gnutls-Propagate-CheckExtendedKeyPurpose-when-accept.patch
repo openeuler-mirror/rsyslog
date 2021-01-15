@@ -1,0 +1,29 @@
+From 37a19fb8997b9b61a7d75852e37110330a07c0d2 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <dueno@redhat.com>
+Date: Mon, 10 Aug 2020 16:37:43 +0200
+Subject: [PATCH 17/73] gnutls: Propagate CheckExtendedKeyPurpose when
+ accepting connection
+
+Previously, when the server accepts a new connection, it doesn't
+properly set the dataTypeCheck field based on the listening socket.
+That results in skipping ExtendedKeyUsage (EKU) check on the client
+certificates.
+---
+ runtime/nsd_gtls.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/runtime/nsd_gtls.c b/runtime/nsd_gtls.c
+index 2eed4246d..ac2d9a41a 100644
+--- a/runtime/nsd_gtls.c
++++ b/runtime/nsd_gtls.c
+@@ -1788,6 +1788,7 @@ AcceptConnReq(nsd_t *pNsd, nsd_t **ppNew)
+ 	pNew->pPermPeers = pThis->pPermPeers;
+ 	pNew->gnutlsPriorityString = pThis->gnutlsPriorityString;
+ 	pNew->DrvrVerifyDepth = pThis->DrvrVerifyDepth;
++	pNew->dataTypeCheck = pThis->dataTypeCheck;
+ 
+ 	/* if we reach this point, we are in TLS mode */
+ 	iRet = gtlsInitSession(pNew);
+-- 
+2.23.0
+

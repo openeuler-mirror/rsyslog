@@ -1,0 +1,133 @@
+From 6763185783f78dc8947103f454a3ddb28c46d362 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Wed, 26 Aug 2020 17:39:49 +0200
+Subject: [PATCH 43/73] core bugfix: segfault if disk-queue file cannot be
+ created
+
+When using Disk Queue and a queue.filename that can not be created
+by rsyslog, the service does not switch to another queue type as
+supposed to and crashes at a later step.
+
+closes: https://github.com/rsyslog/rsyslog/issues/4282
+---
+ runtime/stream.c        |  1 +
+ tests/Makefile.am       |  2 ++
+ tests/diag.sh           |  2 +-
+ tests/diskqueue-fail.sh | 35 +++++++++++++++++++++++++++++++++++
+ tools/rsyslogd.c        |  9 +++++++--
+ 5 files changed, 46 insertions(+), 3 deletions(-)
+ create mode 100755 tests/diskqueue-fail.sh
+
+diff --git a/runtime/stream.c b/runtime/stream.c
+index 044a097ef..abe4ffb4b 100644
+--- a/runtime/stream.c
++++ b/runtime/stream.c
+@@ -2079,6 +2079,7 @@ static rsRetVal strmWriteChar(strm_t *__restrict__ const pThis, const uchar c)
+ 	if(pThis->iBufPtr == pThis->sIOBufSize) {
+ 		CHKiRet(strmFlushInternal(pThis, 0));
+ 	}
++
+ 	/* we now always have space for one character, so we simply copy it */
+ 	*(pThis->pIOBuf + pThis->iBufPtr) = c;
+ 	pThis->iBufPtr++;
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 0df67672c..3b296a106 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -289,6 +289,7 @@ TESTS +=  \
+ 	diskqueue.sh \
+ 	diskqueue-fsync.sh \
+ 	diskqueue-full.sh \
++	diskqueue-fail.sh \
+ 	diskqueue-non-unique-prefix.sh \
+ 	rulesetmultiqueue.sh \
+ 	rulesetmultiqueue-v6.sh \
+@@ -1644,6 +1645,7 @@ EXTRA_DIST= \
+ 	diskq-rfc5424.sh \
+ 	rfc5424parser-sp_at_msg_start.sh \
+ 	diskqueue-full.sh \
++	diskqueue-fail.sh \
+ 	diskqueue.sh \
+ 	diskqueue-non-unique-prefix.sh \
+ 	arrayqueue.sh \
+diff --git a/tests/diag.sh b/tests/diag.sh
+index bc0e408ce..de12d05da 100755
+--- a/tests/diag.sh
++++ b/tests/diag.sh
+@@ -710,7 +710,7 @@ content_count_check() {
+ 		grep_opt=-F
+ 	fi
+ 	file=${3:-$RSYSLOG_OUT_LOG}
+-	count=$(grep -c -F -- "$1" <${RSYSLOG_OUT_LOG})
++	count=$(grep -c $grep_opt -- "$1" <${RSYSLOG_OUT_LOG})
+ 	if [ ${count:=0} -ne "$2" ]; then
+ 	    grep -c -F -- "$1" <${RSYSLOG_OUT_LOG}
+ 	    printf '\n============================================================\n'
+diff --git a/tests/diskqueue-fail.sh b/tests/diskqueue-fail.sh
+new file mode 100755
+index 000000000..a8c63b26b
+--- /dev/null
++++ b/tests/diskqueue-fail.sh
+@@ -0,0 +1,35 @@
++#!/bin/bash
++# checks that nothing bad happens if a DA (disk) queue runs out
++# of configured disk space
++# addd 2017-02-07 by RGerhards, released under ASL 2.0
++. ${srcdir:=.}/diag.sh init
++export NUMMESSAGES=100
++generate_conf
++add_conf '
++module(	load="../plugins/imtcp/.libs/imtcp")
++input(type="imtcp" port="0" listenPortFileName="'$RSYSLOG_DYNNAME'.tcpflood_port" ruleset="queuefail")
++
++template(name="outfmt" type="string"
++	 string="%msg:F,58:2%,%msg:F,58:3%,%msg:F,58:4%\n")
++
++ruleset(
++	name="queuefail"
++	queue.type="Disk"
++	queue.filename="fssailstocreate"
++	queue.maxDiskSpace="4m"
++	queue.maxfilesize="1m"
++	queue.timeoutenqueue="300000"
++	queue.lowwatermark="5000"
++) {
++	action(type="omfile" template="outfmt" file="'$RSYSLOG_OUT_LOG'")
++}
++'
++startup
++
++tcpflood -p$TCPFLOOD_PORT -m$NUMMESSAGES
++
++shutdown_when_empty
++wait_shutdown
++seq_check
++
++exit_test
+diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
+index d2e4833eb..d752bf7ad 100644
+--- a/tools/rsyslogd.c
++++ b/tools/rsyslogd.c
+@@ -808,12 +808,17 @@ rsRetVal createMainQueue(qqueue_t **ppQueue, uchar *pszQueueName, struct nvlst *
+ }
+ 
+ rsRetVal
+-startMainQueue(qqueue_t *pQueue)
++startMainQueue(qqueue_t *const pQueue)
+ {
+ 	DEFiRet;
+ 	CHKiRet_Hdlr(qqueueStart(pQueue)) {
+ 		/* no queue is fatal, we need to give up in that case... */
+-		LogError(0, iRet, "could not start (ruleset) main message queue"); \
++		LogError(0, iRet, "could not start (ruleset) main message queue");
++		pQueue->qType = QUEUETYPE_DIRECT;
++		CHKiRet_Hdlr(qqueueStart(pQueue)) {
++			/* no queue is fatal, we need to give up in that case... */
++			LogError(0, iRet, "fatal error: could not even start queue in direct mode");
++		}
+ 	}
+ 	RETiRet;
+ }
+-- 
+2.23.0
+
