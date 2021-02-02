@@ -3,8 +3,8 @@
 %define rsyslog_docdir %{_docdir}/rsyslog
 
 Name:           rsyslog
-Version:        8.2006.0
-Release:        2
+Version:        8.2012.0
+Release:        1
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -16,6 +16,7 @@ Source4:        rsyslog.log
 Source5:        os_rotate_and_save_log.sh
 Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
+Source8:        rsyslog.service
 
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
@@ -211,6 +212,7 @@ make V=1 check
 
 install -d -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 install -d -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
+install -d -m 755 $RPM_BUILD_ROOT%{_unitdir}
 install -d -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/rsyslog.d
 install -d -m 700 $RPM_BUILD_ROOT%{rsyslog_statedir}
 install -d -m 700 $RPM_BUILD_ROOT%{rsyslog_pkidir}
@@ -219,6 +221,7 @@ install -d -m 755 $RPM_BUILD_ROOT%{rsyslog_docdir}/html
 install -p -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/rsyslog.conf
 install -p -m 644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/rsyslog
 install -p -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/rsyslog
+install -p -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_unitdir}/rsyslog.service
 install -p -m 644 plugins/ommysql/createDB.sql $RPM_BUILD_ROOT%{rsyslog_docdir}/mysql-createDB.sql
 install -p -m 644 plugins/ompgsql/createDB.sql $RPM_BUILD_ROOT%{rsyslog_docdir}/pgsql-createDB.sql
 dos2unix tools/recover_qi.pl
@@ -232,8 +235,6 @@ install -m 0500 %{SOURCE6} $RPM_BUILD_ROOT%{_bindir}/os_check_timezone_for_rsysl
 cp -r doc/* $RPM_BUILD_ROOT%{rsyslog_docdir}/html
 
 %delete_la
-
-sed -i '/^Alias/s/^/;/;/^Requires=syslog.socket/s/^/;/' $RPM_BUILD_ROOT%{_unitdir}/rsyslog.service
 
 %pre
 
@@ -359,6 +360,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Wed Feb 3 2021 yuanxin <yuanxin24@huawei.com> - 8.2012.0-1
+- Upgrade version to 8.2012.0
+
 * Thu Sep 15 2020 Guodong Zhu<zhuguodong8@huawei.com> - 8.2006.0-2
 - Type:NA
 - ID:NA
