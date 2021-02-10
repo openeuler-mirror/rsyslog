@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        3
+Release:        5
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -358,6 +358,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Wed Feb 10 2020 chenjialong<chenjialong@huawei.com> - 8.2006.0-5
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:rebuild.
+
 * Fri Nov 13 2020 shangyibin<shangyibin1@huawei.com> - 8.2006.0-3
 - Type:NA
 - ID:NA
