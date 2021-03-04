@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2012.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -150,9 +150,9 @@ mv build doc
 autoreconf -vfi
 
 %ifarch sparc64
-export CFLAGS="$RPM_OPT_FLAGS -fPIE -DPATH_PIDFILE=\\\"%{Pidfile}\\\""
+export CFLAGS="$RPM_OPT_FLAGS -fPIE"
 %else
-export CFLAGS="$RPM_OPT_FLAGS -fpie -DPATH_PIDFILE=\\\"%{Pidfile}\\\""
+export CFLAGS="$RPM_OPT_FLAGS -fpie"
 export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
 %endif
 
@@ -360,6 +360,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Mar 4 2021 tianwei<tianwei12@huawei.com> - 8.2012.0-2
+- Type:NA
+- ID:NA
+- SUG:restart
+- DESC: fix rsyslog.service failed
+
 * Wed Feb 3 2021 yuanxin <yuanxin24@huawei.com> - 8.2012.0-1
 - Upgrade version to 8.2012.0
 
