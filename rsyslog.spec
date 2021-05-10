@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        5
+Release:        6
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -16,6 +16,7 @@ Source4:        rsyslog.log
 Source5:        os_rotate_and_save_log.sh
 Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
+Source8:        timezone_update.sh
 
 Patch6000:      backport-testbench-set-msg-size-to-64kb-for-sndrcv_omudpspoof.patch
 Patch6001:      backport-FIX-IMUDP-add-missing-free-during-freeCnf.patch
@@ -39,6 +40,8 @@ Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
 Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
 Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
 Patch9005:      openEuler-rsyslog.service.in-create-PID-file.patch
+Patch9006:      openEuler-print-main-queue-info-to-journal-when-queue-full.patch
+Patch9007:      openEuler-print-main-queue-info-to-journal-when-receive-USR1-signal.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -243,6 +246,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/cron.d/
 install -m 0600 %{_sourcedir}/timezone.cron $RPM_BUILD_ROOT/etc/cron.d/
 install -m 0500 %{SOURCE5} $RPM_BUILD_ROOT%{_bindir}/os_rotate_and_save_log.sh
 install -m 0500 %{SOURCE6} $RPM_BUILD_ROOT%{_bindir}/os_check_timezone_for_rsyslog.sh
+install -m 0500 %{SOURCE8} $RPM_BUILD_ROOT%{_bindir}/timezone_update.sh
 
 cp -r doc/* $RPM_BUILD_ROOT%{rsyslog_docdir}/html
 
@@ -283,6 +287,7 @@ systemctl daemon-reload >/dev/null 2>&1
 %{_sbindir}/rsyslogd
 %attr(500,root,root) %{_bindir}/os_rotate_and_save_log.sh
 %attr(500,root,root) %{_bindir}/os_check_timezone_for_rsyslog.sh
+%attr(500,root,root) %{_bindir}/timezone_update.sh
 /etc/cron.d/timezone.cron
 %{_unitdir}/rsyslog.service
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
@@ -374,6 +379,12 @@ systemctl daemon-reload >/dev/null 2>&1
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon May 10 2021 shixuantong <shixuantong@huawei.com> - 8.2006.0-6
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:add timezone_update.sh to Source8 and update patch
+
 * Fri Jan 15 2020 shangyibin<shangyibin1@huawei.com> - 8.2006.0-5
 - Type:NA
 - ID:NA
