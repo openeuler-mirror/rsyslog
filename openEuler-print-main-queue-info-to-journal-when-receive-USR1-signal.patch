@@ -1,0 +1,80 @@
+From 27ee1b988a465e5f89e8a9234f4a01c34cab4387 Mon Sep 17 00:00:00 2001
+From: wangshouping <wangshouping@huawei.com>
+Date: Mon, 27 Apr 2020 08:53:18 -0400
+Subject: [PATCH] print main queue info to journal when receive USR1 signal
+
+Signed-off-by: wangshouping <wangshouping@huawei.com>
+---
+ tools/rsyslogd.c | 19 ++++++++++++++++++-
+ 1 files changed, 45 insertions(+), 1 deletion(-)
+
+diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
+index 7832693..ad92b20 100644
+--- a/tools/rsyslogd.c
++++ b/tools/rsyslogd.c
+@@ -38,6 +38,7 @@
+ #ifdef HAVE_LIBSYSTEMD
+ #	include <systemd/sd-daemon.h>
+ #endif
++#include <systemd/sd-journal.h>
+ 
+ #include "rsyslog.h"
+ #include "wti.h"
+@@ -181,6 +182,7 @@ void rsyslogdDoDie(int sig);
+ /* global data items */
+ static int bChildDied;
+ static int bHadHUP;
++static int g_bRecordQueue;
+ static int doFork = 1; 	/* fork - run in daemon mode - read-only after startup */
+ int bFinished = 0;	/* used by termination signal handler, read-only except there
+ 			 * is either 0 or the number of the signal that requested the
+@@ -1267,8 +1269,13 @@ rsyslogdDebugSwitch(void)
+ 		dbgprintf("\n");
+ 		debugging_on = 0;
+ 	}
++
+ }
+ 
++static void RsyslogdDebugQueue(void)
++{
++	g_bRecordQueue = 1;
++}
+ 
+ /* This is the main entry point into rsyslogd. Over time, we should try to
+  * modularize it a bit more...
+@@ -1616,7 +1623,7 @@ initAll(int argc, char **argv)
+ 		hdlr_enable(SIGINT,  rsyslogdDoDie);
+ 		hdlr_enable(SIGQUIT, rsyslogdDoDie);
+ 	} else {
+-		hdlr_enable(SIGUSR1, SIG_IGN);
++		hdlr_enable(SIGUSR1, RsyslogdDebugQueue);
+ 		hdlr_enable(SIGINT,  SIG_IGN);
+ 		hdlr_enable(SIGQUIT, SIG_IGN);
+ 	}
+@@ -1953,6 +1960,7 @@ mainloop(void)
+ 	sigaddset(&sigblockset, SIGTERM);
+ 	sigaddset(&sigblockset, SIGCHLD);
+ 	sigaddset(&sigblockset, SIGHUP);
++	sigaddset(&sigblockset, SIGUSR1);
+ 
+ 	do {
+ 		processImInternal();
+@@ -1967,6 +1975,15 @@ mainloop(void)
+ 			doHUP();
+ 			bHadHUP = 0;
+ 		}
++		if (g_bRecordQueue) {
++			if (pMsgQueue != NULL) {
++				sd_journal_print(LOG_NOTICE, "main queue size information: current QueueSize=%d MaxQueueSize=%d\n",
++						pMsgQueue->iQueueSize, pMsgQueue->iMaxQueueSize);
++			} else {
++				sd_journal_print(LOG_NOTICE, "main queue size information: pMsgQueue is NULL!\n");
++			}
++			g_bRecordQueue = 0;
++		}
+ 
+ 		if(bFinished)
+ 			break;	/* exit as quickly as possible */
+-- 
+2.19.1
+
