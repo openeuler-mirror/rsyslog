@@ -9,7 +9,7 @@ Documentation=https://www.rsyslog.com/doc/
 [Service]
 Type=notify
 EnvironmentFile=-/etc/sysconfig/rsyslog
-ExecStart=/usr/sbin/rsyslogd -n $SYSLOGD_OPTIONS
+ExecStart=/usr/sbin/rsyslogd -n -i/var/run/rsyslogd.pid  $SYSLOGD_OPTIONS
 Restart=on-failure
 UMask=0066
 StandardOutput=null
