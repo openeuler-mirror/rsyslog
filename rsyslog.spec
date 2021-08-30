@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2012.0
-Release:        2
+Release:        3
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -358,6 +358,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon Aug 30 2021 wuchaochao<wuchaochao4@huawei.com> - 8.2012.0-3
+- Sync update 21.09 branch code patch 
+
 * Fri Jun 11 2021 shangyibin<shangyibin1@huawei.com> - 8.2012.0-2
 - Type:NA
 - ID:NA
