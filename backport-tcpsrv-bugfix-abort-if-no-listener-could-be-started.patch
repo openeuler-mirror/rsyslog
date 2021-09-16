@@ -1,0 +1,58 @@
+From 3d23c7ac8aea5e1ac0118978d457aa7819531879 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Wed, 7 Jul 2021 13:16:28 +0200
+Subject: [PATCH] tcpsrv bugfix: abort if no listener could be started
+ Modules (like imtcp and imdiag) which use tcpsrv could abort or
+otherwise malfunction if no listener for a specific input could
+be started.
+ Found during implementing a new feature, no report from practice.
+But could very well happen.
+trust merge open source commit:3d23c7ac8aea5e1ac0118978d457aa7819531879
+
+---
+ plugins/imdiag/imdiag.c | 1 +
+ plugins/imtcp/imtcp.c   | 1 +
+ runtime/tcpsrv.c        | 5 +++++
+ 3 files changed, 7 insertions(+)
+ diff --git a/plugins/imdiag/imdiag.c b/plugins/imdiag/imdiag.c
+index 3e27ee4d3..f5662e894 100644
+--- a/plugins/imdiag/imdiag.c
++++ b/plugins/imdiag/imdiag.c
+@@ -126,6 +126,7 @@ static rsRetVal
+ doOpenLstnSocks(tcpsrv_t *pSrv)
+ {
+ 	ISOBJ_TYPE_assert(pSrv, tcpsrv);
++	dbgprintf("in imdiag doOpenLstnSocks\n");
+ 	return tcpsrv.create_tcp_socket(pSrv);
+ }
+ 
+diff --git a/plugins/imtcp/imtcp.c b/plugins/imtcp/imtcp.c
+index 63d4a0d51..858f70f1f 100644
+--- a/plugins/imtcp/imtcp.c
++++ b/plugins/imtcp/imtcp.c
+@@ -229,6 +229,7 @@ static rsRetVal
+ doOpenLstnSocks(tcpsrv_t *pSrv)
+ {
+ 	ISOBJ_TYPE_assert(pSrv, tcpsrv);
++	dbgprintf("in imtcp doOpenLstnSocks\n");
+ 	return tcpsrv.create_tcp_socket(pSrv);
+ }
+ 
+diff --git a/runtime/tcpsrv.c b/runtime/tcpsrv.c
+index baa8892d8..2b6bea252 100644
+--- a/runtime/tcpsrv.c
++++ b/runtime/tcpsrv.c
+@@ -926,6 +926,11 @@ Run(tcpsrv_t *pThis)
+ 
+ 	ISOBJ_TYPE_assert(pThis, tcpsrv);
+ 
++	if(pThis->iLstnCurr == 0) {
++		dbgprintf("tcpsrv: no listeneres at all (probably init error), terminating\n");
++		RETiRet; /* somewhat "dirty" exit to avoid issue with cancel handler */
++	}
++
+ 	/* check if we need to start the worker pool. Once it is running, all is
+ 	 * well. Shutdown is done on modExit.
+ 	 */
+-- 
+2.23.0

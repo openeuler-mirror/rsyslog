@@ -1,0 +1,39 @@
+From 6a1faa065a60c080915f1abdcfa82bc39b88d895 Mon Sep 17 00:00:00 2001
+From: Gerd Rausch <gerd.rausch@oracle.com>
+Date: Thu, 15 Apr 2021 11:16:29 -0700
+Subject: [PATCH] imjournal: flush buffer before fsync
+ Flush the FILE* buffer before rename & fsync in order
+to not end up syncing an empty file.
+ Also, close WorkDir on fsync in order to prevent
+file descriptor leakage.
+ Signed-off-by: Gerd Rausch <gerd.rausch@oracle.com>
+Signed-off-by: Venu Busireddy <venu.busireddy@oracle.com>
+trust merge open source commit:6a1faa065a60c080915f1abdcfa82bc39b88d895
+
+---
+ plugins/imjournal/imjournal.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+ diff --git a/plugins/imjournal/imjournal.c b/plugins/imjournal/imjournal.c
+index 35c3f8f9b..62a5ab206 100644
+--- a/plugins/imjournal/imjournal.c
++++ b/plugins/imjournal/imjournal.c
+@@ -562,6 +562,8 @@ persistJournalState(void)
+ 		ABORT_FINALIZE(RS_RET_IO_ERROR);
+ 	}
+ 
++	fflush(sf);
++
+ 	/* change the name of the file to the configured one */
+ 	if (rename(tmp_sf, cs.stateFile) < 0) {
+ 		LogError(errno, iRet, "imjournal: rename() failed for new path: '%s'", cs.stateFile);
+@@ -583,6 +585,8 @@ persistJournalState(void)
+ 			LogError(errno, RS_RET_IO_ERROR, "imjournal: fsync on '%s' failed", glbl.GetWorkDir());
+ 			ABORT_FINALIZE(RS_RET_IO_ERROR);
+ 		}
++
++		closedir(wd);
+ 	}
+ 
+ 	DBGPRINTF("Persisted journal to '%s'\n", cs.stateFile);
+-- 
+2.23.0

@@ -1,0 +1,38 @@
+From c6cdf972e5cf1691a6dadb50ce0402257271bc78 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Thu, 1 Jul 2021 14:24:50 +0200
+Subject: [PATCH] tcp subsystem: fix cosmetic memory leak on shutdown
+ Memory for config parameter was not free'd on rsyslog shutdown. This had
+no real consequence, but caused memleak alerts during development.
+trust merge open source commit:c6cdf972e5cf1691a6dadb50ce0402257271bc78
+
+---
+ plugins/imtcp/imtcp.c | 1 +
+ tools/omfwd.c         | 1 +
+ 2 files changed, 2 insertions(+)
+ diff --git a/plugins/imtcp/imtcp.c b/plugins/imtcp/imtcp.c
+index f1478dc15..63d4a0d51 100644
+--- a/plugins/imtcp/imtcp.c
++++ b/plugins/imtcp/imtcp.c
+@@ -707,6 +707,7 @@ BEGINfreeCnf
+ CODESTARTfreeCnf
+ 	free(pModConf->pszStrmDrvrName);
+ 	free(pModConf->pszStrmDrvrAuthMode);
++	free(pModConf->gnutlsPriorityString);
+ 	free(pModConf->pszStrmDrvrPermitExpiredCerts);
+ 	if(pModConf->permittedPeers != NULL) {
+ 		cnfarrayContentDestruct(pModConf->permittedPeers);
+diff --git a/tools/omfwd.c b/tools/omfwd.c
+index 5a210444e..1131268d4 100644
+--- a/tools/omfwd.c
++++ b/tools/omfwd.c
+@@ -405,6 +405,7 @@ CODESTARTfreeInstance
+ 	free(pData->pszStrmDrvr);
+ 	free(pData->pszStrmDrvrAuthMode);
+ 	free(pData->pszStrmDrvrPermitExpiredCerts);
++	free(pData->gnutlsPriorityString);
+ 	free(pData->port);
+ 	free(pData->networkNamespace);
+ 	free(pData->target);
+-- 
+2.23.0

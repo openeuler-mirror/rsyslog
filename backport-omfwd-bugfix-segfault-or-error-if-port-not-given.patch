@@ -1,0 +1,36 @@
+From 4529fa02b674f689d1cbc6925663824ea6882a15 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Mon, 15 Feb 2021 09:05:05 +0100
+Subject: [PATCH] omfwd bugfix: segfault or error if port not given
+ If omfwd is configured via RainerScript config format and the "port"
+parameter is not given, a segfault will most likely happen on
+connection establishment for TCP connections. For UDP, this is
+usually not the case.
+ Alternatively, in any case, errors may happen.
+ Note that the segfault will usually happen right on restart so this
+was easy to detect.
+ We did not receive reports from practice. Instead, we found the bug
+while conducting other work.
+trust merge open source commit:4529fa02b674f689d1cbc6925663824ea6882a15
+
+---
+ tools/omfwd.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+ diff --git a/tools/omfwd.c b/tools/omfwd.c
+index 1304f43f3..5a210444e 100644
+--- a/tools/omfwd.c
++++ b/tools/omfwd.c
+@@ -1336,6 +1336,11 @@ CODESTARTnewActInst
+ 		}
+ 	}
+ 
++	/* check if no port is set. If so, we use the IANA-assigned port of 514 */
++	if(pData->port == NULL) {
++		CHKmalloc(pData->port = strdup("514"));
++	}
++
+ 	if(complevel != -1) {
+ 		pData->compressionLevel = complevel;
+ 		if(pData->compressionMode == COMPRESS_NEVER) {
+-- 
+2.23.0

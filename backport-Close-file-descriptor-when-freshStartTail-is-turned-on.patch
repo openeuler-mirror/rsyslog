@@ -1,0 +1,22 @@
+From b4a312b6361b7035f161383e3a51c7821958511a Mon Sep 17 00:00:00 2001
+From: alakatos <alakatos@redhat.com>
+Date: Thu, 22 Jul 2021 11:19:16 +0200
+Subject: [PATCH] Close file descriptor when freshStartTail is turned on
+
+
+---
+ plugins/imfile/imfile.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/imfile/imfile.c b/plugins/imfile/imfile.c
+index db161cc491..ddbd286bb4 100644
+--- a/plugins/imfile/imfile.c
++++ b/plugins/imfile/imfile.c
+@@ -1544,6 +1544,7 @@ openFileWithoutStateFile(act_obj_t *const act)
+ 		const int fd = open(act->name, O_RDONLY | O_CLOEXEC);
+ 		if(fd >= 0) {
+ 			act->pStrm->iCurrOffs = lseek64(fd, 0, SEEK_END);
++			close(fd);
+ 			if(act->pStrm->iCurrOffs < 0) {
+ 				act->pStrm->iCurrOffs = 0;
+ 				LogError(errno, RS_RET_ERR, "imfile: could not query current "

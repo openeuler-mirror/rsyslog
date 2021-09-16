@@ -1,0 +1,36 @@
+From 9121c4ea5aeaac9b1ee7bd8c308c8fde95bc39b4 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Wed, 4 Aug 2021 08:03:46 +0200
+Subject: [PATCH] imptcp bugfix: keep alive interval was incorrectly set
+
+The interval was accidentally set to keep alive interval. This has been
+corrected.
+
+closes https://github.com/rsyslog/rsyslog/issues/4609
+4
+---
+ plugins/imptcp/imptcp.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/imptcp/imptcp.c b/plugins/imptcp/imptcp.c
+index e89971dbe8..cdd29d4fd5 100644
+--- a/plugins/imptcp/imptcp.c
++++ b/plugins/imptcp/imptcp.c
+@@ -1721,7 +1721,7 @@ static rsRetVal addInstance(void __attribute__((unused)) *pVal, uchar *const pNe
+ 	inst->pBindRuleset = NULL;
+ 	inst->bSuppOctetFram = cs.bSuppOctetFram;
+ 	inst->bKeepAlive = cs.bKeepAlive;
+-	inst->iKeepAliveIntvl = cs.iKeepAliveTime;
++	inst->iKeepAliveIntvl = cs.iKeepAliveIntvl;
+ 	inst->iKeepAliveProbes = cs.iKeepAliveProbes;
+ 	inst->iKeepAliveTime = cs.iKeepAliveTime;
+ 	inst->bEmitMsgOnClose = cs.bEmitMsgOnClose;
+@@ -1750,7 +1750,7 @@ addListner(modConfData_t __attribute__((unused)) *modConf, instanceConf_t *inst)
+ 	pSrv->bSuppOctetFram = inst->bSuppOctetFram;
+ 	pSrv->bSPFramingFix = inst->bSPFramingFix;
+ 	pSrv->bKeepAlive = inst->bKeepAlive;
+-	pSrv->iKeepAliveIntvl = inst->iKeepAliveTime;
++	pSrv->iKeepAliveIntvl = inst->iKeepAliveIntvl;
+ 	pSrv->iKeepAliveProbes = inst->iKeepAliveProbes;
+ 	pSrv->iKeepAliveTime = inst->iKeepAliveTime;
+ 	pSrv->bEmitMsgOnClose = inst->bEmitMsgOnClose;

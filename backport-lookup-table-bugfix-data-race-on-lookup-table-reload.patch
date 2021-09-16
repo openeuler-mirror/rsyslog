@@ -1,0 +1,28 @@
+From 389484010fd95d611873e80bdbca898d9671170a Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Fri, 29 Jan 2021 09:25:09 +0100
+Subject: [PATCH] lookup table bugfix: data race on lookup table reload
+ A data race could happen when a lookup table was reloaded. We found
+this while moving to newer version of TSAN, but have no matching
+report from practice. However, there is a potential for this to cause
+a segfault under "bad circumstances".
+trust merge open source commit:389484010fd95d611873e80bdbca898d9671170a
+
+---
+ grammar/rainerscript.c | 2 ++
+ 1 file changed, 2 insertions(+)
+ diff --git a/grammar/rainerscript.c b/grammar/rainerscript.c
+index 2e358353e..c86985962 100644
+--- a/grammar/rainerscript.c
++++ b/grammar/rainerscript.c
+@@ -2377,6 +2377,8 @@ doFunct_Lookup(struct cnffunc *__restrict__ const func,
+ 		return;
+ 	}
+ 	cnfexprEval(func->expr[1], &srcVal, usrptr, pWti);
++	pthread_rwlock_rdlock(&((lookup_ref_t*)func->funcdata)->rwlock);
++	pthread_rwlock_unlock(&((lookup_ref_t*)func->funcdata)->rwlock);
+ 	lookup_table = ((lookup_ref_t*)func->funcdata)->self;
+ 	if (lookup_table != NULL) {
+ 		lookup_key_type = lookup_table->key_type;
+-- 
+2.23.0
