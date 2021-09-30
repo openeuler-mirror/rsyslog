@@ -1,0 +1,41 @@
+From ad08ed2634fa8be1d07312966803fd156038578d Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Thu, 8 Jul 2021 14:30:50 +0200
+Subject: [PATCH] openssl network driver bugfix: small memory leak
+ Fixes a static, non-growing memory leak which existed when parameter
+"GnutTLSPriorityString" was used. This was primarily a cosmetic issue,
+but caused some grief during development in regard to memory leak
+detectors.
+ Note: yes, this is for openssl -- the parameter name is history ;-)
+trust merge open source commit:ad08ed2634fa8be1d07312966803fd156038578d
+
+---
+ runtime/nsd_ossl.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+ diff --git a/runtime/nsd_ossl.c b/runtime/nsd_ossl.c
+index d6188db23..8fff75338 100644
+--- a/runtime/nsd_ossl.c
++++ b/runtime/nsd_ossl.c
+@@ -1785,11 +1785,8 @@ finalize_it:
+ }
+ 
+ 
+-/* Empty wrapper for GNUTLS helper function
+- * TODO: implement a similar capability
+- */
+ static rsRetVal
+-SetGnutlsPriorityString(__attribute__((unused)) nsd_t *pNsd, __attribute__((unused)) uchar *gnutlsPriorityString)
++SetGnutlsPriorityString(nsd_t *const pNsd, uchar *const gnutlsPriorityString)
+ {
+ 	DEFiRet;
+ 	nsd_ossl_t* pThis = (nsd_ossl_t*) pNsd;
+@@ -1869,6 +1866,7 @@ SetGnutlsPriorityString(__attribute__((unused)) nsd_t *pNsd, __attribute__((unus
+ 						pThis->gnutlsPriorityString);
+ 				osslLastSSLErrorMsg(0, NULL, LOG_ERR, "SetGnutlsPriorityString");
+ 			}
++			SSL_CONF_CTX_free(cctx);
+ 		}
+ #else
+ 		dbgprintf("gnutlsPriorityString: set to '%s'\n", gnutlsPriorityString);
+-- 
+2.23.0

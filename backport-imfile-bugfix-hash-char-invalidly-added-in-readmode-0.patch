@@ -1,0 +1,30 @@
+From d93c5e9d4830197a36830ba285bc5179312cbfc3 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Mon, 9 Aug 2021 12:38:06 +0200
+Subject: [PATCH] imfile bugfix: hash char invalidly added in readmode != 0
+
+If imfile is ingesting log files with readMode set to 2 or 1, the resulting
+messages all have a '#' character at the end. This patch corrects the behaviour.
+
+Note: if some external script "supported" the bug of extra hash character at
+the end of line, it may be necessary to update them.
+
+closes https://github.com/rsyslog/rsyslog/issues/4491
+
+---
+ runtime/stream.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/runtime/stream.c b/runtime/stream.c
+index abe4ffb4bd..23cde86a07 100644
+--- a/runtime/stream.c
++++ b/runtime/stream.c
+@@ -888,7 +888,7 @@ strmReadLine(strm_t *const pThis, cstr_t **ppCStr, uint8_t mode, sbool bEscapeLF
+ {
+ 	uchar c;
+ 	uchar finished;
+-	const int escapeLFString_len = (escapeLFString == NULL) ? 3 : strlen((char*) escapeLFString);
++	const int escapeLFString_len = (escapeLFString == NULL) ? 4 : strlen((char*) escapeLFString);
+ 	DEFiRet;
+ 
+ 	assert(pThis != NULL);

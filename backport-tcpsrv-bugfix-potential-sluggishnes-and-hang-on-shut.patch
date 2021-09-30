@@ -1,0 +1,35 @@
+From b160813f8296397fb971e4aef9faf7f903a3bb7f Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Tue, 27 Apr 2021 08:27:34 +0200
+Subject: [PATCH] tcpsrv bugfix: potential sluggishnes and hang on shutdown
+ tcpsrv is used by multiple other modules (imtcp, imdiag, imgssapi, and,
+in theory, also others - even ones we do not know about). However, the
+internal synchornization did not properly take multiple tcpsrv users
+in consideration.
+ As such, a single user could hang under some circumstances. This was
+caused by improperly awaking all users from a pthread condition wait.
+That in turn could lead to some sluggish behaviour and, in rare cases,
+a hang at shutdown.
+ Note: it was highly unlikely to experience real problems with the
+officially provided modules.
+ This patch corrects the situation.
+trust merge open source commit:b160813f8296397fb971e4aef9faf7f903a3bb7f
+
+---
+ runtime/tcpsrv.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ diff --git a/runtime/tcpsrv.c b/runtime/tcpsrv.c
+index 2f16677b0..baa8892d8 100644
+--- a/runtime/tcpsrv.c
++++ b/runtime/tcpsrv.c
+@@ -711,7 +711,7 @@ wrkr(void *const myself)
+ 		pthread_mutex_lock(&wrkrMut);
+ 		me->pSrv = NULL;	/* indicate we are free again */
+ 		--wrkrRunning;
+-		pthread_cond_signal(&wrkrIdle);
++		pthread_cond_broadcast(&wrkrIdle);
+ 	}
+ 	me->enabled = 0; /* indicate we are no longer available */
+ 	pthread_mutex_unlock(&wrkrMut);
+-- 
+2.23.0

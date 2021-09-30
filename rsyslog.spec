@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2006.0
-Release:        6
+Release:        7
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -34,6 +34,18 @@ Patch6012:      backport-Do-not-create-empty-objects-when-accessing-non-exist.pa
 Patch6013:      backport-gnutls-Added-handshake-error-handling-into-doRetry-h.patch
 Patch6014:      backport-msg-segfault-in-jsonPathFindNext-when-root-is-not-an.patch
 Patch6015:      backport-msg-memory-leak-in-msgAddJSON-if-jsonPathFindParent-.patch
+Patch6016:      backport-testbench-simplify-test-ID-generation-a-bit.patch
+Patch6017:      backport-lookup-table-bugfix-data-race-on-lookup-table-reload.patch
+Patch6018:      backport-omfwd-bugfix-segfault-or-error-if-port-not-given.patch
+Patch6019:      backport-imjournal-flush-buffer-before-fsync.patch
+Patch6020:      backport-OMMONGODB-Fixes.patch
+Patch6021:      backport-openssl-network-driver-bugfix-small-memory-leak.patch
+Patch6022:      backport-tcpsrv-bugfix-abort-if-no-listener-could-be-started.patch
+Patch6023:      backport-tcpsrv-bugfix-potential-sluggishnes-and-hang-on-shut.patch
+Patch6024:      backport-tcp-subsystem-fix-cosmetic-memory-leak-on-shutdown.patch
+Patch6025:      backport-imptcp-bugfix-keep-alive-interval-was-incorrectly-set.patch
+Patch6026:      backport-imfile-bugfix-hash-char-invalidly-added-in-readmode-0.patch
+Patch6027:      backport-Close-file-descriptor-when-freshStartTail-is-turned-on.patch
 
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
@@ -379,6 +391,9 @@ systemctl daemon-reload >/dev/null 2>&1
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Sep 16 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2006.0-7
+- backport patches from upstream
+
 * Mon May 10 2021 shixuantong <shixuantong@huawei.com> - 8.2006.0-6
 - Type:NA
 - ID:NA
