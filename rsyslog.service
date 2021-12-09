@@ -10,7 +10,6 @@ Documentation=https://www.rsyslog.com/doc/
 Type=notify
 EnvironmentFile=-/etc/sysconfig/rsyslog
 ExecStart=/usr/sbin/rsyslogd -n -i/var/run/rsyslogd.pid  $SYSLOGD_OPTIONS
-Restart=on-failure
 UMask=0066
 StandardOutput=null
 Restart=on-failure
