@@ -3,8 +3,8 @@
 %define rsyslog_docdir %{_docdir}/rsyslog
 
 Name:           rsyslog
-Version:        8.2012.0
-Release:        4
+Version:        8.2110.0
+Release:        1
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -35,10 +35,10 @@ Provides:       syslog
 Obsoletes:      sysklogd < 1.5-11
 Provides:       rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
 Provides:       rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql
-Provides:       rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
+Provides:       rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 Obsoletes:      rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
 Obsoletes:      rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql
-Obsoletes:      rsyslog-snmp rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
+Obsoletes:      rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 
 %description
 RSYSLOG is the rocket-fast system for log processing.It offers high-performance,
@@ -135,6 +135,16 @@ BuildRequires: librelp-devel >= 1.0.3
 The rsyslog-relp package contains the rsyslog plugins that provide
 the ability to receive syslog messages via the reliable RELP
 protocol.
+
+%package snmp
+Summary: SNMP protocol support for rsyslog
+Group: System Environment/Daemons
+Requires: %name = %version-%release
+BuildRequires: net-snmp-devel 
+
+%description snmp
+The rsyslog-snmp package contains the rsyslog plugin that provides the
+ability to send syslog messages as SNMPv1 and SNMPv2c traps.
 
 %package_help
 
@@ -307,7 +317,6 @@ done
 %{_libdir}/rsyslog/omjournal.so
 %{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omprog.so
-%{_libdir}/rsyslog/omsnmp.so
 %{_libdir}/rsyslog/omstdout.so
 %{_libdir}/rsyslog/omtesting.so
 %{_libdir}/rsyslog/omuxsock.so
@@ -351,6 +360,9 @@ done
 %{_libdir}/rsyslog/imrelp.so
 %{_libdir}/rsyslog/omrelp.so
 
+%files snmp
+%{_libdir}/rsyslog/omsnmp.so
+
 %files help
 %doc %{rsyslog_docdir}/html
 %{_mandir}/man5/rsyslog.conf.5.gz
@@ -358,6 +370,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Dec 09 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-1
+- update version to 8.2110.0
+
 * Thu Aug 26 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2012.0-4
 - Type:NA
 - ID:NA
