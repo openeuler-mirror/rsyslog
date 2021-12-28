@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -33,12 +33,6 @@ Requires:       logrotate >= 3.5.2 bash >= 2.0
 
 Provides:       syslog
 Obsoletes:      sysklogd < 1.5-11
-Provides:       rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
-Provides:       rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql
-Provides:       rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
-Obsoletes:      rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse
-Obsoletes:      rsyslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql
-Obsoletes:      rsyslog-gssapi rsyslog-gnutls rsyslog-updspoof
 
 %description
 RSYSLOG is the rocket-fast system for log processing.It offers high-performance,
@@ -145,6 +139,94 @@ BuildRequires: net-snmp-devel
 %description snmp
 The rsyslog-snmp package contains the rsyslog plugin that provides the
 ability to send syslog messages as SNMPv1 and SNMPv2c traps.
+
+%package crypto
+Summary: Encryption support
+Requires: %name = %version-%release
+
+%description crypto
+This package contains a module providing log file encryption and a
+command line tool to process encrypted logs.
+
+%package doc
+Summary: HTML documentation for rsyslog
+BuildArch: noarch
+
+%description doc
+This subpackage contains documentation for rsyslog.
+
+%package elasticsearch
+Summary: ElasticSearch output module for rsyslog
+Requires: %name = %version-%release
+BuildRequires: libcurl-devel
+
+%description elasticsearch
+This module provides the capability for rsyslog to feed logs directly into
+Elasticsearch.
+
+%package mmjsonparse
+Summary: JSON enhanced logging support
+Requires: %name = %version-%release
+
+%description mmjsonparse
+This module provides the capability to recognize and parse JSON enhanced
+syslog messages.
+
+%package mysql
+Summary: MySQL support for rsyslog
+Requires: %name = %version-%release
+BuildRequires: mariadb-connector-c-devel
+
+%description mysql
+The rsyslog-mysql package contains a dynamic shared object that will add
+MySQL database support to rsyslog.
+
+%package mmsnmptrapd
+Summary: Message modification module for snmptrapd generated messages
+Requires: %name = %version-%release
+
+%description mmsnmptrapd
+This message modification module takes messages generated from snmptrapd and
+modifies them so that they look like they originated from the read originator.
+
+%package mmaudit
+Summary: Message modification module supporting Linux audit format
+Requires: %name = %version-%release
+
+%description mmaudit
+This module provides message modification supporting Linux audit format
+in various settings.
+
+%package gssapi
+Summary: GSSAPI authentication and encryption support for rsyslog
+Requires: %name = %version-%release
+BuildRequires: krb5-devel
+
+%description gssapi
+The rsyslog-gssapi package contains the rsyslog plugins which support GSSAPI
+authentication and secure connections. GSSAPI is commonly used for Kerberos
+authentication.
+
+%package gnutls
+Summary: TLS protocol support for rsyslog via GnuTLS library
+Requires: %name = %version-%release
+BuildRequires: gnutls-devel
+
+%description gnutls
+The rsyslog-gnutls package contains the rsyslog plugins that provide the
+ability to send and receive syslog messages via TCP or RELP using TLS
+encryption via GnuTLS library. For details refer to rsyslog doc on imtcp
+and omfwd modules.
+
+%package udpspoof
+Summary: Provides the omudpspoof module
+Requires: %name = %version-%release
+BuildRequires: libnet-devel
+
+%description udpspoof
+This module is similar to the regular UDP forwarder, but permits to
+spoof the sender address. Also, it enables to circle through a number
+of source ports.
 
 %package_help
 
@@ -265,8 +347,6 @@ done
 %defattr(-,root,root,-)
 %doc ChangeLog README.md
 %license AUTHORS
-%doc %{rsyslog_docdir}/html
-%doc %{rsyslog_docdir}/mysql-createDB.sql
 %doc %{rsyslog_docdir}/pgsql-createDB.sql
 %license COPYING*
 %{rsyslog_docdir}
@@ -282,11 +362,9 @@ done
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/rsyslog
 %config(noreplace) %{_sysconfdir}/logrotate.d/rsyslog
-%{_bindir}/rscryutil
 %{_libdir}/rsyslog/fmhttp.so
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/imfile.so
-%{_libdir}/rsyslog/imgssapi.so
 %{_libdir}/rsyslog/imjournal.so
 %{_libdir}/rsyslog/imklog.so
 %{_libdir}/rsyslog/immark.so
@@ -295,32 +373,22 @@ done
 %{_libdir}/rsyslog/imtcp.so
 %{_libdir}/rsyslog/imudp.so
 %{_libdir}/rsyslog/imuxsock.so
-%{_libdir}/rsyslog/lmcry_gcry.so
-%{_libdir}/rsyslog/lmgssutil.so
 %{_libdir}/rsyslog/lmnet.so
 %{_libdir}/rsyslog/lmnetstrms.so
-%{_libdir}/rsyslog/lmnsd_gtls.so
 %{_libdir}/rsyslog/lmnsd_ptcp.so
 %{_libdir}/rsyslog/lmregexp.so
 %{_libdir}/rsyslog/lmtcpclt.so
 %{_libdir}/rsyslog/lmtcpsrv.so
 %{_libdir}/rsyslog/lmzlibw.so
 %{_libdir}/rsyslog/mmanon.so
-%{_libdir}/rsyslog/mmaudit.so
 %{_libdir}/rsyslog/mmcount.so
 %{_libdir}/rsyslog/mmexternal.so
-%{_libdir}/rsyslog/mmjsonparse.so
-%{_libdir}/rsyslog/mmsnmptrapd.so
 %{_libdir}/rsyslog/ommail.so
-%{_libdir}/rsyslog/omelasticsearch.so
-%{_libdir}/rsyslog/omgssapi.so
 %{_libdir}/rsyslog/omjournal.so
-%{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omprog.so
 %{_libdir}/rsyslog/omstdout.so
 %{_libdir}/rsyslog/omtesting.so
 %{_libdir}/rsyslog/omuxsock.so
-%{_libdir}/rsyslog/ommysql.so
 %{_libdir}/rsyslog/pmaixforwardedfrom.so
 %{_libdir}/rsyslog/pmcisconames.so
 %{_libdir}/rsyslog/pmlastmsg.so
@@ -363,6 +431,40 @@ done
 %files snmp
 %{_libdir}/rsyslog/omsnmp.so
 
+%files crypto
+%{_bindir}/rscryutil
+%{_libdir}/rsyslog/lmcry_gcry.so
+
+%files doc
+%doc %{rsyslog_docdir}/html
+
+%files elasticsearch
+%{_libdir}/rsyslog/omelasticsearch.so
+
+%files mmjsonparse
+%{_libdir}/rsyslog/mmjsonparse.so
+
+%files mysql
+%doc %{rsyslog_docdir}/mysql-createDB.sql
+%{_libdir}/rsyslog/ommysql.so
+
+%files mmsnmptrapd
+%{_libdir}/rsyslog/mmsnmptrapd.so
+
+%files mmaudit
+%{_libdir}/rsyslog/mmaudit.so
+
+%files gssapi
+%{_libdir}/rsyslog/lmgssutil.so
+%{_libdir}/rsyslog/imgssapi.so
+%{_libdir}/rsyslog/omgssapi.so
+
+%files gnutls
+%{_libdir}/rsyslog/lmnsd_gtls.so
+
+%files udpspoof
+%{_libdir}/rsyslog/omudpspoof.so
+
 %files help
 %doc %{rsyslog_docdir}/html
 %{_mandir}/man5/rsyslog.conf.5.gz
@@ -370,6 +472,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Tue Dec 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-2
+- move rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse syslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql syslog-gssapi rsyslog-gnutls rsyslog-updspoof from rsyslog
+
 * Thu Dec 09 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-1
 - update version to 8.2110.0
 
