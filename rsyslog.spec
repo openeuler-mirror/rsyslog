@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        2
+Release:        3
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -17,6 +17,7 @@ Source5:        os_rotate_and_save_log.sh
 Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
 Source8:        rsyslog.service
+Source9:        timezone_update.sh
 
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
@@ -322,6 +323,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/cron.d/
 install -m 0600 %{_sourcedir}/timezone.cron $RPM_BUILD_ROOT/etc/cron.d/
 install -m 0500 %{SOURCE5} $RPM_BUILD_ROOT%{_bindir}/os_rotate_and_save_log.sh
 install -m 0500 %{SOURCE6} $RPM_BUILD_ROOT%{_bindir}/os_check_timezone_for_rsyslog.sh
+install -m 0500 %{SOURCE8} $RPM_BUILD_ROOT%{_bindir}/timezone_update.sh
 
 cp -r doc/* $RPM_BUILD_ROOT%{rsyslog_docdir}/html
 
@@ -357,6 +359,7 @@ done
 %{_sbindir}/rsyslogd
 %attr(500,root,root) %{_bindir}/os_rotate_and_save_log.sh
 %attr(500,root,root) %{_bindir}/os_check_timezone_for_rsyslog.sh
+%attr(500,root,root) %{_bindir}/timezone_update.sh
 /etc/cron.d/timezone.cron
 %{_unitdir}/rsyslog.service
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
@@ -472,7 +475,10 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
-* Tue Dec 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-2
+* Fri Feb 11 2022 wuchaochao <cyanrose@yeah.net> - 8.2110.0-3
+- update timezone when restart rsyslog
+
+* Tue Dec 14  2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-2
 - move rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse syslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql syslog-gssapi rsyslog-gnutls rsyslog-updspoof from rsyslog
 
 * Thu Dec 09 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-1
