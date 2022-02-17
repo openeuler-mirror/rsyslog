@@ -1,5 +1,6 @@
 #!/bin/bash
 
+umask 0077
 LOCK_FILE=/var/lock/os_check_timezone_change.lock
 exec 200<>$LOCK_FILE
 flock -nx 200

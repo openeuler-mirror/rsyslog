@@ -10,6 +10,7 @@ Documentation=https://www.rsyslog.com/doc/
 Type=notify
 EnvironmentFile=-/etc/sysconfig/rsyslog
 ExecStart=/usr/sbin/rsyslogd -n -i/var/run/rsyslogd.pid  $SYSLOGD_OPTIONS
+ExecStartPost=/bin/bash /usr/bin/timezone_update.sh
 UMask=0066
 StandardOutput=null
 Restart=on-failure
