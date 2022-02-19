@@ -1,0 +1,77 @@
+From 27ee1b988a465e5f89e8a9234f4a01c34cab4387 Mon Sep 17 00:00:00 2001
+From: wangshouping <wangshouping@huawei.com>
+Date: Mon, 27 Apr 2020 08:53:18 -0400
+Subject: [PATCH] print main queue info to journal when queue full
+Signed-off-by: wangshouping <wangshouping@huawei.com>
+---
+ runtime/queue.c  | 27 +++++++++++++++++++++++++++
+ 1 files changed, 45 insertions(+), 1 deletion(-)
+diff --git a/runtime/queue.c b/runtime/queue.c
+index e988e44..9faf5aa 100644
+--- a/runtime/queue.c
++++ b/runtime/queue.c
+@@ -47,6 +47,7 @@
+ #include <errno.h>
+ #include <inttypes.h>
+ #include <sys/vfs.h>
++#include <systemd/sd-journal.h>
+ 
+ #include "rsyslog.h"
+ #include "queue.h"
+@@ -116,6 +117,14 @@ rsRetVal qqueueSetSpoolDir(qqueue_t *pThis, uchar *pszSpoolDir, int lenSpoolDir)
+ /* some constants for queuePersist () */
+ #define QUEUE_CHECKPOINT	1
+ #define QUEUE_NO_CHECKPOINT	0
++#define TIME_OUT		300
++#define TIMEOUT_ENQUEUE_ZERO     1
++#define TIMEOUT_ENQUEUE_NONZERO  2
++
++struct timespec g_lastTime = {
++	.tv_sec = 0,
++	.tv_nsec = 0,
++};
+ 
+ /* tables for interfacing with the v6 config system */
+ static struct cnfparamdescr cnfpdescr[] = {
+@@ -2985,6 +2992,24 @@ finalize_it:
+ 	RETiRet;
+ }
+ 
++void PrintQueueFullLog(qqueue_t *pThis, int flag)
++{
++	struct timespec timeNow;
++
++	clock_gettime(CLOCK_MONOTONIC, &timeNow);
++	if (timeNow.tv_sec - g_lastTime.tv_sec > TIME_OUT) {
++		if (flag == TIMEOUT_ENQUEUE_ZERO) {
++			sd_journal_print(LOG_NOTICE, "doEnqSingleObject: queue FULL - configured for immediate "
++					"discarding QueueSize=%d MaxQueueSize=%d sizeOnDisk=%lld "
++					"sizeOnDiskMax=%lld\n", pThis->iQueueSize, pThis->iMaxQueueSize,
++					pThis->tVars.disk.sizeOnDisk, pThis->sizeOnDiskMax);
++		} else if (flag == TIMEOUT_ENQUEUE_NONZERO) {
++			sd_journal_print(LOG_NOTICE, "doEnqSingleObject: queue FULL, iQueueSize=%d MaxQueueSize=%d - waiting %dms to drain.\n",
++					pThis->iQueueSize, pThis->iMaxQueueSize, pThis->toEnq);
++		}
++		g_lastTime.tv_sec = timeNow.tv_sec;
++	}
++}
+ 
+ /* enqueue a single data object.
+  * Note that the queue mutex MUST already be locked when this function is called.
+@@ -3082,12 +3107,14 @@ doEnqSingleObj(qqueue_t *pThis, flowControl_t flowCtlType, smsg_t *pMsg)
+ 					"discarding QueueSize=%d MaxQueueSize=%d sizeOnDisk=%lld "
+ 					"sizeOnDiskMax=%lld\n", pThis->iQueueSize, pThis->iMaxQueueSize,
+ 					pThis->tVars.disk.sizeOnDisk, pThis->sizeOnDiskMax);
++			PrintQueueFullLog(pThis, TIMEOUT_ENQUEUE_ZERO);
+ 			STATSCOUNTER_INC(pThis->ctrFDscrd, pThis->mutCtrFDscrd);
+ 			msgDestruct(&pMsg);
+ 			ABORT_FINALIZE(RS_RET_QUEUE_FULL);
+ 		} else {
+ 			DBGOPRINT((obj_t*) pThis, "doEnqSingleObject: queue FULL - waiting %dms to drain.\n",
+ 				pThis->toEnq);
++			PrintQueueFullLog(pThis, TIMEOUT_ENQUEUE_NONZERO);
+ 			if(glbl.GetGlobalInputTermState()) {
+ 				DBGOPRINT((obj_t*) pThis, "doEnqSingleObject: queue FULL, discard due to "
+ 					"FORCE_TERM.\n");
+-- 
+2.19.1
