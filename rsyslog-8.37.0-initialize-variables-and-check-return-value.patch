@@ -1,4 +1,4 @@
-From 9a137580322bd863a48479755aee9c30d0a084e9 Mon Sep 17 00:00:00 2001
+From 5ce33ba295e9e210aff7cb137998d8490583d516 Mon Sep 17 00:00:00 2001
 From: wangshouping <wangshouping@huawei.com>
 Date: Wed, 15 Apr 2020 03:07:55 -0400
 Subject: [PATCH] rsyslog-8.37.0-initialize-variables-and-check-return-value
@@ -6,11 +6,10 @@ Subject: [PATCH] rsyslog-8.37.0-initialize-variables-and-check-return-value
 Signed-off-by: wangshouping <wangshouping@huawei.com>
 ---
  plugins/imjournal/imjournal.c | 22 +++++++++++++---------
- tools/rsyslogd.c              |  2 +-
- 2 files changed, 14 insertions(+), 10 deletions(-)
+ 1 file changed, 13 insertions(+), 9 deletions(-)
 
 diff --git a/plugins/imjournal/imjournal.c b/plugins/imjournal/imjournal.c
-index 3a93b37..1656de7 100644
+index aa27fe7..c5d3d25 100644
 --- a/plugins/imjournal/imjournal.c
 +++ b/plugins/imjournal/imjournal.c
 @@ -386,7 +386,7 @@ readjournal(void)
@@ -57,19 +56,5 @@ index 3a93b37..1656de7 100644
  	}else
  	       /* submit message */
  	       enqMsg((uchar *)message, (uchar *) sys_iden_help, facility, severity, &tv, json, 0);
-diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
-index 6b531b1..7832693 100644
---- a/tools/rsyslogd.c
-+++ b/tools/rsyslogd.c
-@@ -266,7 +266,7 @@ static rsRetVal
- writePidFile(void)
- {
- 	FILE *fp;
--	int fd;
-+	int fd = -1;
- 	DEFiRet;
- 
- 	const char *tmpPidFile;
 -- 
-2.19.1
-
+2.27.0
