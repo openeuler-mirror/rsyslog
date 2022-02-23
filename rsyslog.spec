@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        4
+Release:        5
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -22,10 +22,9 @@ Source9:        timezone_update.sh
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
 Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
-Patch9003:      rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
-Patch9004:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
-Patch9005:	print-main-queue-info-to-journal-when-queue-full.patch
-Patch9006:	print-main-queue-info-to-journal-when-receive-USR1-signal.patch
+Patch9003:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
+Patch9004:	print-main-queue-info-to-journal-when-queue-full.patch
+Patch9005:	print-main-queue-info-to-journal-when-receive-USR1-signal.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -477,6 +476,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Wed Feb 23 wuchaochao <cyanrose@yeah.net> - 8.2110.0-5
+- deleted:    rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
+
 * Sat Feb 19 2022 liuyumeng <liuyumeng5@h-partners.com> - 8.2110.0-4
 - print main queue info to journal
 
