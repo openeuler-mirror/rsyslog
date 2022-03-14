@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        6
+Release:        7
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -476,6 +476,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon Mar 14 2022 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-7
+- change startlimitburst spelling errors
+
 * Feb Mon 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-6
 - Increase the limit on restart frequency
 
