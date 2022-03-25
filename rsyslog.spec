@@ -2,9 +2,12 @@
 %define rsyslog_pkidir %{_sysconfdir}/pki/rsyslog
 %define rsyslog_docdir %{_docdir}/rsyslog
 
+# If the systemd server exists, the macro value of systemd_lived is 1, otherwise it is 0
+%define systemd_lived 1
+
 Name:           rsyslog
 Version:        8.2110.0
-Release:        7
+Release:        8
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -23,13 +26,18 @@ Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.p
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
 Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
 Patch9003:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
-Patch9004:	print-main-queue-info-to-journal-when-queue-full.patch
-Patch9005:	print-main-queue-info-to-journal-when-receive-USR1-signal.patch
+%if %{systemd_lived} == 1
+Patch9004:      print-main-queue-info-to-journal-when-queue-full.patch
+Patch9005:      print-main-queue-info-to-journal-when-receive-USR1-signal.patch
+%endif
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
-BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 systemd-devel >= 204-8 python-sphinx
+BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9  python-sphinx
 BuildRequires:  mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
+%if %{systemd_lived} == 1
+BuildRequires:  systemd-devel >= 204-8
+%endif
 Requires:       logrotate >= 3.5.2 bash >= 2.0 
 %{?systemd_requires}
 
@@ -263,7 +271,10 @@ export HIREDIS_LIBS="-L%{_libdir} -lhiredis"
 	--enable-gssapi-krb5 \
 	--enable-imdiag \
 	--enable-imfile \
-	--enable-imjournal \
+        %if %{systemd_lived} == 1
+        --enable-imjournal \
+        --enable-omjournal \
+        %endif
 	--enable-impstats \
 	--enable-imptcp \
 	--enable-mail \
@@ -277,7 +288,6 @@ export HIREDIS_LIBS="-L%{_libdir} -lhiredis"
 	--enable-mysql \
 	--enable-omamqp1 \
 	--enable-omhiredis \
-	--enable-omjournal \
 	--enable-ommongodb \
 	--enable-omprog \
 	--enable-omrabbitmq \
@@ -338,6 +348,8 @@ do
 	[ -f $n ] && continue
 	umask 066 && touch $n
 done
+
+%if %{systemd_lived} == 1
 %systemd_post rsyslog.service
 
 %preun
@@ -345,6 +357,8 @@ done
 
 %postun
 %systemd_postun_with_restart rsyslog.service
+
+%endif
 
 %files
 %defattr(-,root,root,-)
@@ -369,7 +383,10 @@ done
 %{_libdir}/rsyslog/fmhttp.so
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/imfile.so
+%if %{systemd_lived} == 1
+%{_libdir}/rsyslog/omjournal.so
 %{_libdir}/rsyslog/imjournal.so
+%endif
 %{_libdir}/rsyslog/imklog.so
 %{_libdir}/rsyslog/immark.so
 %{_libdir}/rsyslog/impstats.so
@@ -388,7 +405,6 @@ done
 %{_libdir}/rsyslog/mmcount.so
 %{_libdir}/rsyslog/mmexternal.so
 %{_libdir}/rsyslog/ommail.so
-%{_libdir}/rsyslog/omjournal.so
 %{_libdir}/rsyslog/omprog.so
 %{_libdir}/rsyslog/omstdout.so
 %{_libdir}/rsyslog/omtesting.so
@@ -476,6 +492,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Fri Mar 25 2022 wuchaochao <cyanrose@yeah.net> - 8.2110.0-8
+- add systemd_lived macro
+
 * Mon Mar 14 2022 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-7
 - change startlimitburst spelling errors
 
