@@ -4,7 +4,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        6
+Release:        7
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -17,7 +17,7 @@ Source5:        os_rotate_and_save_log.sh
 Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
 Source8:        rsyslog.service
-Source9:        timezone_update.sh
+Source9:	timezone_update.sh
 
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
@@ -476,19 +476,22 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
-* Thu May 03 wangkerong <wangkerong@h-partners.com> - 8.2110.0-6
+* Mon Mar 14 2022 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-7
+- change startlimitburst spelling errors
+
+* Feb Mon 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-6
 - Increase the limit on restart frequency
 
-* Wed Feb 23 wuchaochao <cyanrose@yeah.net> - 8.2110.0-5
-- deleted:    rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
-
-* Sat Feb 19 2022 liuyumeng <liuyumeng5@h-partners.com> - 8.2110.0-4
-- print main queue info to journal
-
-* Fri Feb 11 2022 wuchaochao <cyanrose@yeah.net> - 8.2110.0-3
+* Feb Mon 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-5
 - update timezone when restart rsyslog
 
-* Tue Dec 14  2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-2
+* Wed Feb 23 2022  wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-4
+- delete  rsyslog-8.24.0-set-permission-of-syslogd-dot-pid-to-0644.patch
+
+* Sat Feb 19 2022 liuyumeng <liuyumeng5@h-partners.com> - 8.2110.0-3
+- print main queue info to journal
+
+* Tue Dec 14 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-2
 - move rsyslog-crypto rsyslog-doc rsyslog-elasticsearch rsyslog-mmjsonparse syslog-mmaudit rsyslog-mmsnmptrapd rsyslog-mysql syslog-gssapi rsyslog-gnutls rsyslog-updspoof from rsyslog
 
 * Thu Dec 09 2021 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-1
