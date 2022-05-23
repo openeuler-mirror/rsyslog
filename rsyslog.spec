@@ -46,6 +46,7 @@ Patch6024:      backport-tcp-subsystem-fix-cosmetic-memory-leak-on-shutdown.patc
 Patch6025:      backport-imptcp-bugfix-keep-alive-interval-was-incorrectly-set.patch
 Patch6026:      backport-imfile-bugfix-hash-char-invalidly-added-in-readmode-0.patch
 Patch6027:      backport-Close-file-descriptor-when-freshStartTail-is-turned-on.patch
+Patch6028:	bugfix-CVE-2022-24903.patch
 
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
