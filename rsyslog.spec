@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        8
+Release:        9
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -30,6 +30,7 @@ Patch9003:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
 Patch9004:      print-main-queue-info-to-journal-when-queue-full.patch
 Patch9005:      print-main-queue-info-to-journal-when-receive-USR1-signal.patch
 %endif
+Patch9006:      bugfix-CVE-2022-24903.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -492,6 +493,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon May 23 2022 zhanghaolian <zhanghaolian@huawei.com> - 8.2110.0-9
+- fix CVE-2022-24903
+
 * Fri Mar 25 2022 wuchaochao <cyanrose@yeah.net> - 8.2110.0-8
 - add systemd_lived macro
 
