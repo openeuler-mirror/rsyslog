@@ -18,6 +18,8 @@ Source6:        os_check_timezone_for_rsyslog.sh
 Source7:        timezone.cron
 Source8:        timezone_update.sh
 
+Patch6000:	bugfix-CVE-2022-24903.patch
+
 Patch9000:      rsyslog-8.24.0-ensure-parent-dir-exists-when-writting-log-file.patch
 Patch9001:      bugfix-rsyslog-7.4.7-imjournal-add-monotonic-timestamp.patch
 Patch9002:      bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak.patch
