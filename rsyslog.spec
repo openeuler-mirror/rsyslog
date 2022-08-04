@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        9
+Release:        10
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -31,6 +31,16 @@ Patch9004:      print-main-queue-info-to-journal-when-queue-full.patch
 Patch9005:      print-main-queue-info-to-journal-when-receive-USR1-signal.patch
 %endif
 Patch9006:      bugfix-CVE-2022-24903.patch
+
+Patch6000:      backport-testbench-skip-omfwd_fast_imuxsock.sh-if-liblogging-stdlog-is-not-available.patch
+Patch6001:      backport-Fixes-4395-by-correctly-checking-for-EPIPE.patch
+Patch6002:      backport-rsyslogd-adjust-the-order-of-doHUP-and-processImInte.patch
+Patch6003:      backport-gnutls-bugfix-Fix-error-handling-in-gtlsRecordRecv.patch
+Patch6004:      backport-Fix-non-null-terminated-string-used-with-strlen.patch
+Patch6005:      backport-tcpsrv-do-not-decrease-number-of-to-be-processed-fds.patch
+Patch6006:      backport-imptcp-bugfix-worker-thread-starvation-on-extreme-tr.patch
+Patch6007:      backport-Fix-memory-leak-when-globally-de-initialize-GnuTLS.patch
+Patch6008:      backport-Fix-memory-leak-when-free-action-worker-data-table.patch 
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -265,7 +275,7 @@ export HIREDIS_LIBS="-L%{_libdir} -lhiredis"
 %configure \
 	--prefix=/usr \
 	--disable-static \
-	--disable-testbench \
+	--enable-testbench \
 	--enable-elasticsearch \
 	--enable-generate-man-pages \
 	--enable-gnutls \
@@ -338,7 +348,10 @@ install -m 0500 %{SOURCE6} $RPM_BUILD_ROOT%{_bindir}/os_check_timezone_for_rsysl
 install -m 0500 %{SOURCE9} $RPM_BUILD_ROOT%{_bindir}/timezone_update.sh
 
 cp -r doc/* $RPM_BUILD_ROOT%{rsyslog_docdir}/html
-
+rm -f %{buildroot}%{_libdir}/rsyslog/imdiag.so
+rm -f %{buildroot}%{_libdir}/rsyslog/liboverride_getaddrinfo.so
+rm -f %{buildroot}%{_libdir}/rsyslog/liboverride_gethostname.so
+rm -f %{buildroot}%{_libdir}/rsyslog/liboverride_gethostname_nonfqdn.so
 %delete_la
 
 %pre
@@ -417,7 +430,6 @@ done
 %exclude %{rsyslog_docdir}/html
 %exclude %{rsyslog_docdir}/mysql-createDB.sql
 %exclude %{rsyslog_docdir}/pgsql-createDB.sql
-%exclude %{_libdir}/rsyslog/imdiag.so
 
 %files hiredis
 %{_libdir}/rsyslog/omhiredis.so
@@ -493,6 +505,9 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Aug 04 2022 zhouwenpei <zhouwenpei1@h-partners.com> - 8.2110.0-10
+- backport patches from upstream and enable check
+
 * Mon May 23 2022 zhanghaolian <zhanghaolian@huawei.com> - 8.2110.0-9
 - fix CVE-2022-24903
 
