@@ -1,0 +1,32 @@
+From d909290dc2d9ffab86409e054abd1abaaf998571 Mon Sep 17 00:00:00 2001
+From: Iwan Timmer <iwan.timmer@northwave.nl>
+Date: Fri, 29 Apr 2022 15:14:27 +0200
+Subject: [PATCH] tcpsrv: do not decrease number of to be processed fds on
+ error
+
+nfds should only be decreased for processed streams and not for
+streams returning an error code, like RS_RET_RETRY.
+
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/6ffc14fd450b90872272871130d29ab3ecf85f6f
+---
+ runtime/tcpsrv.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/runtime/tcpsrv.c b/runtime/tcpsrv.c
+index 06b9abe..2c91c2e 100644
+--- a/runtime/tcpsrv.c
++++ b/runtime/tcpsrv.c
+@@ -880,7 +880,8 @@ RunSelect(tcpsrv_t *pThis, nsd_epworkset_t workset[], size_t sizeWorkset)
+ 					processWorkset(pThis, NULL, iWorkset, workset);
+ 					iWorkset = 0;
+ 				}
+-				--nfds; /* indicate we have processed one */
++				if(bIsReady)
++					--nfds; /* indicate we have processed one */
+ 			}
+ 			iTCPSess = TCPSessGetNxtSess(pThis, iTCPSess);
+ 		}
+-- 
+2.33.0
+
