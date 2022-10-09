@@ -1,0 +1,50 @@
+From 63e5d6845aedd649eee1f807e85784a066163ad0 Mon Sep 17 00:00:00 2001
+From: seuzw930 <76191785+seuzw930@users.noreply.github.com>
+Date: Mon, 18 Jul 2022 15:43:17 +0800
+Subject: [PATCH] Fix memory leak when free action worker data table
+
+During free action worker data table when action destruct, worker instance in worker data table were not null. It resulted in memory leak and this patch fixes this behaviour.
+
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/d59feba46b8d8c2c3c5c25c6fc6e99f93bdae8b9
+---
+ action.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/action.c b/action.c
+index e0d05ed..4cea500 100644
+--- a/action.c
++++ b/action.c
+@@ -326,6 +326,20 @@ actionResetQueueParams(void)
+ 	RETiRet;
+ }
+ 
++/* free action worker data table
++*/
++static void freeWrkrDataTable(action_t * const pThis)
++{
++	int freeSpot;
++	for(freeSpot = 0; freeSpot < pThis->wrkrDataTableSize; ++freeSpot) {
++		if(pThis->wrkrDataTable[freeSpot] != NULL) {
++			pThis->pMod->mod.om.freeWrkrInstance(pThis->wrkrDataTable[freeSpot]);
++			pThis->wrkrDataTable[freeSpot] = NULL;
++		}
++	}
++	free(pThis->wrkrDataTable);
++	return;
++}
+ 
+ /* destructs an action descriptor object
+  * rgerhards, 2007-08-01
+@@ -363,7 +377,7 @@ rsRetVal actionDestruct(action_t * const pThis)
+ 	free(pThis->pszName);
+ 	free(pThis->ppTpl);
+ 	free(pThis->peParamPassing);
+-	free(pThis->wrkrDataTable);
++	freeWrkrDataTable(pThis);
+ 
+ finalize_it:
+ 	free(pThis);
+-- 
+2.33.0
+
