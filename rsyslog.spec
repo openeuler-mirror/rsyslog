@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        10
+Release:        11
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -44,7 +44,7 @@ Patch6008:      backport-Fix-memory-leak-when-free-action-worker-data-table.patc
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
-BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9  python-sphinx
+BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9  
 BuildRequires:  mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
 %if %{systemd_lived} == 1
 BuildRequires:  systemd-devel >= 204-8
@@ -253,8 +253,6 @@ of source ports.
 
 %prep
 %setup -q -a 1 -T -c
-sphinx-build -b html source build
-rm -r LICENSE README.md source
 mv build doc
 
 %autosetup -n %{name}-%{version} -D -p1
@@ -505,6 +503,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Mon Oct 10 2022 huangduirong <huangduirong@huawei.com> - 8.2110.0-11
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:remove the sphinx-build in prep
+
 * Thu Aug 04 2022 zhouwenpei <zhouwenpei1@h-partners.com> - 8.2110.0-10
 - backport patches from upstream and enable check
 
