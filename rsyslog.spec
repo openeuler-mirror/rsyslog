@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        11
+Release:        12
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -44,7 +44,7 @@ Patch6008:      backport-Fix-memory-leak-when-free-action-worker-data-table.patc
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
-BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9  
+BuildRequires:  libfastjson-devel >= 0.99.8 libestr-devel >= 0.1.9 python-sphinx 
 BuildRequires:  mariadb-connector-c-devel net-snmp-devel qpid-proton-c-devel libcurl-devel
 %if %{systemd_lived} == 1
 BuildRequires:  systemd-devel >= 204-8
@@ -503,6 +503,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Thu Oct 13 2022 huangduirong <huangduirong@huawei.com> - 8.2110.0-12
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC:fix build failed
+
 * Mon Oct 10 2022 huangduirong <huangduirong@huawei.com> - 8.2110.0-11
 - Type:NA
 - ID:NA
