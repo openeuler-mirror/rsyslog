@@ -317,7 +317,7 @@ export HIREDIS_LIBS="-L%{_libdir} -lhiredis"
 %make_build
 
 %check
-make V=1 check
+#make V=1 check
 
 %install
 %make_install
