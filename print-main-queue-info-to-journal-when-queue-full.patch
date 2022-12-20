@@ -3,22 +3,29 @@ From: wangshouping <wangshouping@huawei.com>
 Date: Mon, 27 Apr 2020 08:53:18 -0400
 Subject: [PATCH] print main queue info to journal when queue full
 Signed-off-by: wangshouping <wangshouping@huawei.com>
+
+V-2: add macro control for systemd/sd-journal.h
+Signed-off-by: pengyi37 <pengyi37@huawei.com>
+
 ---
- runtime/queue.c  | 27 +++++++++++++++++++++++++++
- 1 files changed, 45 insertions(+), 1 deletion(-)
+ runtime/queue.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
 diff --git a/runtime/queue.c b/runtime/queue.c
-index e988e44..9faf5aa 100644
+index 3083fb9..b3fdd51 100644
 --- a/runtime/queue.c
 +++ b/runtime/queue.c
-@@ -47,6 +47,7 @@
+@@ -47,6 +47,9 @@
  #include <errno.h>
  #include <inttypes.h>
  #include <sys/vfs.h>
-+#include <systemd/sd-journal.h>
++#ifdef HAVE_LIBSYSTEMD
++#	include <systemd/sd-journal.h>
++#endif
  
  #include "rsyslog.h"
  #include "queue.h"
-@@ -116,6 +117,14 @@ rsRetVal qqueueSetSpoolDir(qqueue_t *pThis, uchar *pszSpoolDir, int lenSpoolDir)
+@@ -116,6 +119,14 @@ rsRetVal qqueueSetSpoolDir(qqueue_t *pThis, uchar *pszSpoolDir, int lenSpoolDir)
  /* some constants for queuePersist () */
  #define QUEUE_CHECKPOINT	1
  #define QUEUE_NO_CHECKPOINT	0
@@ -33,7 +40,7 @@ index e988e44..9faf5aa 100644
  
  /* tables for interfacing with the v6 config system */
  static struct cnfparamdescr cnfpdescr[] = {
-@@ -2985,6 +2992,24 @@ finalize_it:
+@@ -3008,6 +3019,24 @@ finalize_it:
  	RETiRet;
  }
  
@@ -58,7 +65,7 @@ index e988e44..9faf5aa 100644
  
  /* enqueue a single data object.
   * Note that the queue mutex MUST already be locked when this function is called.
-@@ -3082,12 +3107,14 @@ doEnqSingleObj(qqueue_t *pThis, flowControl_t flowCtlType, smsg_t *pMsg)
+@@ -3105,12 +3134,14 @@ doEnqSingleObj(qqueue_t *pThis, flowControl_t flowCtlType, smsg_t *pMsg)
  					"discarding QueueSize=%d MaxQueueSize=%d sizeOnDisk=%lld "
  					"sizeOnDiskMax=%lld\n", pThis->iQueueSize, pThis->iMaxQueueSize,
  					pThis->tVars.disk.sizeOnDisk, pThis->sizeOnDiskMax);
@@ -74,4 +81,5 @@ index e988e44..9faf5aa 100644
  				DBGOPRINT((obj_t*) pThis, "doEnqSingleObject: queue FULL, discard due to "
  					"FORCE_TERM.\n");
 -- 
-2.19.1
+2.23.0
+
