@@ -1,0 +1,32 @@
+From b3ba1d7280bab1b623e1b2aaf390bbae8aa8c484 Mon Sep 17 00:00:00 2001
+From: seuzw930 <76191785+seuzw930@users.noreply.github.com>
+Date: Sun, 14 Aug 2022 16:52:53 +0800
+Subject: [PATCH] Fix memory leak when SetString
+
+During SetString reassign to pThis->szVal.psz, pThis->szVal.psz might not null. It resulted in memory leak and this patch fixes this behaviour.
+
+The problem is mentioned here:
+https://github.com/rsyslog/rsyslog/issues/4961From f65b8860358b7aaca76d3abe086ac2bf80e2079b Mon Sep 17 00:00:00 2001
+
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/b3ba1d7280bab1b623e1b2aaf390bbae8aa8c484
+---
+ runtime/prop.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/runtime/prop.c b/runtime/prop.c
+index 866b691..c4de5d7 100644
+--- a/runtime/prop.c
++++ b/runtime/prop.c
+@@ -84,6 +84,9 @@ static rsRetVal SetString(prop_t *pThis, const uchar *psz, const int len)
+ 	if(len < CONF_PROP_BUFSIZE) {
+ 		memcpy(pThis->szVal.sz, psz, len + 1);
+ 	} else {
++		if(pThis->szVal.psz != NULL) {
++			free(pThis->szVal.psz);
++		}
+ 		CHKmalloc(pThis->szVal.psz = malloc(len + 1));
+ 		memcpy(pThis->szVal.psz, psz, len + 1);
+ 	}
+-- 
+2.27.0
