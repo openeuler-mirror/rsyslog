@@ -1,0 +1,218 @@
+From a335ec06f0897a71356afee3362f67e68b91a3de Mon Sep 17 00:00:00 2001
+From: Andre lorbach <alorbach@adiscon.com>
+Date: Thu, 28 Jul 2022 16:17:41 +0200
+Subject: [PATCH] mmanon: Simplified and fixed IPv4 digit detection.
+
+- Fixed an issue with numbers above int64 in syntax_ipv4.
+  Numbers that were up to 256 above the max of an int64
+  could incorrectly be detected as valid ipv4 digit.
+- Simplified the IPv4 digit detection function and renamed
+  to isPosByte.
+- added testcasse for malformed IPvc4 addresses
+
+closes: https://github.com/rsyslog/rsyslog/issues/4940
+
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/a335ec06f0897a71356afee3362f67e68b91a3de
+---
+ plugins/mmanon/mmanon.c                | 55 ++++++++++++++------------
+ tests/Makefile.am                      |  2 +
+ tests/mmanon_recognize_ipv4.sh         |  4 ++
+ tests/mmanon_simple_mallformed_ipv4.sh | 37 +++++++++++++++++
+ 4 files changed, 73 insertions(+), 25 deletions(-)
+ create mode 100755 tests/mmanon_simple_mallformed_ipv4.sh
+
+diff --git a/plugins/mmanon/mmanon.c b/plugins/mmanon/mmanon.c
+index a2ebd7b..4f83076 100644
+--- a/plugins/mmanon/mmanon.c
++++ b/plugins/mmanon/mmanon.c
+@@ -22,6 +22,7 @@
+ #include "config.h"
+ #include "rsyslog.h"
+ #include <stdio.h>
++#include <ctype.h>
+ #include <stdarg.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -388,72 +389,76 @@ getHexVal(char c)
+ }
+ 
+ 
+-/* returns -1 if no integer found, else integer */
+-static int64_t
+-getPosInt(const uchar *const __restrict__ buf,
++/* returns 1 if valid IPv4 digit, 0 if not */
++static int
++isPosByte(const uchar *const __restrict__ buf,
+ 	const size_t buflen,
+ 	size_t *const __restrict__ nprocessed)
+ {
+-	int64_t val = 0;
++	int val = 0; /* Default means no byte found */
+ 	size_t i;
+-	for(i = 0 ; i < buflen ; i++) {
+-		if('0' <= buf[i] && buf[i] <= '9')
+-			val = val*10 + buf[i]-'0';
+-		else
++	for(i = 0 ; i < buflen; i++) {
++		if('0' <= buf[i] && buf[i] <= '9') {
++			/* Maximum 3 digits for single IPv4 Number, we only copy up to 4 numbers
++			 * but process forward to non digits */
++			if (i < 4) {
++				val = val*10 + buf[i]-'0';
++			}
++		} else
+ 			break;
+ 	}
+ 	*nprocessed = i;
+-	if(i == 0)
+-		val = -1;
+-	return val;
++	/* Return 1 if more than 1 and less the 4 digits and between 0 and 255 */
++	if(	i > 0 &&
++		i < 4 &&
++		(val >= 0 && val <= 255)) {
++		return 1;
++	} else {
++		return 0;
++	}
+ }
+ 
+ /* 1 - is IPv4, 0 not */
+-
+ static int
+ syntax_ipv4(const uchar *const __restrict__ buf,
+ 	const size_t buflen,
+ 	size_t *const __restrict__ nprocessed)
+ {
+-	int64_t val;
+-	size_t nproc;
++	size_t nproc = 0;
+ 	size_t i;
+ 	int r = 0;
+-
+-	val = getPosInt(buf, buflen, &i);
+-	if(val < 0 || val > 255)
++	if(isPosByte(buf, buflen, &i) == 0) {
+ 		goto done;
+-
++	}
+ 	if(i >= buflen || buf[i] != '.') {
+ 		goto done;
+ 	}
+ 	i++;
+-	val = getPosInt(buf+i, buflen-i, &nproc);
+-	if(val < 0 || val > 255)
++	if(isdigit(buf[i]) == 0 || isPosByte(buf+i, buflen-i, &nproc) == 0) {
+ 		goto done;
++	}
+ 	i += nproc;
+ 
+ 	if(i >= buflen || buf[i] != '.') {
+ 		goto done;
+ 	}
+ 	i++;
+-	val = getPosInt(buf+i, buflen-i, &nproc);
+-	if(val < 0 || val > 255)
++	if(isdigit(buf[i]) == 0 || isPosByte(buf+i, buflen-i, &nproc) == 0) {
+ 		goto done;
++	}
+ 	i += nproc;
+ 
+ 	if(i >= buflen || buf[i] != '.') {
+ 		goto done;
+ 	}
+ 	i++;
+-	val = getPosInt(buf+i, buflen-i, &nproc);
+-	if(val < 0 || val > 255)
++	if(isdigit(buf[i]) == 0 || isPosByte(buf+i, buflen-i, &nproc) == 0) {
+ 		goto done;
++	}
+ 	i += nproc;
+ 
+ 	*nprocessed = i;
+ 	r = 1;
+-
+ done:
+ 	return r;
+ }
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index d3b040b..5e4f4fe 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -587,6 +587,7 @@ TESTS +=  \
+ 	mmanon_simple_12_ipv4.sh \
+ 	mmanon_simple_33_ipv4.sh \
+ 	mmanon_simple_8_ipv4.sh \
++	mmanon_simple_mallformed_ipv4.sh \
+ 	mmanon_random_128_ipv6.sh \
+ 	mmanon_zero_128_ipv6.sh \
+ 	mmanon_zero_96_ipv6.sh \
+@@ -1872,6 +1873,7 @@ EXTRA_DIST= \
+ 	mmanon_simple_12_ipv4.sh \
+ 	mmanon_simple_33_ipv4.sh \
+ 	mmanon_simple_8_ipv4.sh \
++	mmanon_simple_mallformed_ipv4.sh \
+ 	mmanon_random_128_ipv6.sh \
+ 	mmanon_zero_128_ipv6.sh \
+ 	mmanon_zero_96_ipv6.sh \
+diff --git a/tests/mmanon_recognize_ipv4.sh b/tests/mmanon_recognize_ipv4.sh
+index fb7eb9f..cd9dcca 100755
+--- a/tests/mmanon_recognize_ipv4.sh
++++ b/tests/mmanon_recognize_ipv4.sh
+@@ -2,6 +2,10 @@
+ # add 2016-11-22 by Jan Gerhards, released under ASL 2.0
+ 
+ . ${srcdir:=.}/diag.sh init
++
++#export RSYSLOG_DEBUG="debug nostdout noprintmutexaction"
++#export RSYSLOG_DEBUGLOG="$RSYSLOG_DYNNAME.debuglog"
++
+ generate_conf
+ add_conf '
+ template(name="outfmt" type="string" string="%msg%\n")
+diff --git a/tests/mmanon_simple_mallformed_ipv4.sh b/tests/mmanon_simple_mallformed_ipv4.sh
+new file mode 100755
+index 0000000..7ef8899
+--- /dev/null
++++ b/tests/mmanon_simple_mallformed_ipv4.sh
+@@ -0,0 +1,37 @@
++#!/bin/bash
++# add 2022-07-28 by Andre Lorbach, released under ASL 2.0
++
++. ${srcdir:=.}/diag.sh init
++#export USE_VALGRIND="YES" # this test only makes sense with valgrind enabled
++#export RS_TEST_VALGRIND_EXTRA_OPTS="--keep-debuginfo=yes"
++
++#export RSYSLOG_DEBUG="debug nostdout noprintmutexaction"
++#export RSYSLOG_DEBUGLOG="$RSYSLOG_DYNNAME.debuglog"
++
++generate_conf
++add_conf '
++template(name="outfmt" type="string" string="%msg%\n")
++
++module(load="../plugins/mmanon/.libs/mmanon")
++module(load="../plugins/imtcp/.libs/imtcp")
++input(type="imtcp" port="0" listenPortFileName="'$RSYSLOG_DYNNAME'.tcpflood_port" ruleset="testing")
++
++ruleset(name="testing") {
++	action(type="mmanon" ipv4.bits="32" ipv4.mode="simple")
++	action(type="omfile" file=`echo $RSYSLOG_OUT_LOG` template="outfmt")
++}'
++
++startup
++tcpflood -m1 -M "\"<129>Mar 10 01:00:00 172.20.245.8 tag: 165874883373.1.15599155266856607338.91@whatever
++<129>Mar 10 01:00:00 172.20.245.8 tag: 1.165874883373.15599155266856607338.91@whatever
++<129>Mar 10 01:00:00 172.20.245.8 tag: 15599155266856607338.165874883373.1.91@whatever
++<129>Mar 10 01:00:00 172.20.245.8 tag: 91.165874883373.1.15599155266856607338.@whatever\""
++
++shutdown_when_empty
++wait_shutdown
++export EXPECTED=' 165874883373.1.15599155266856607338.91@whatever
++ 1.165874883373.15599155266856607338.91@whatever
++ 15599155266856607338.165874883373.1.91@whatever
++ 91.165874883373.1.15599155266856607338.@whatever'
++cmp_exact
++exit_test
+-- 
+2.27.0

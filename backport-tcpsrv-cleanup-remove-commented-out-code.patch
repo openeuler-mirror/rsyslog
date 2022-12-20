@@ -1,0 +1,39 @@
+From 22bef1c86200e594fd6d5d42fb10647d1303874f Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Tue, 23 Aug 2022 14:45:11 +0200
+Subject: [PATCH] tcpsrv: cleanup - remove commented out code
+
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/22bef1c86200e594fd6d5d42fb10647d1303874f
+---
+ runtime/tcpsrv.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/runtime/tcpsrv.c b/runtime/tcpsrv.c
+index 2c91c2e..2feb2cc 100644
+--- a/runtime/tcpsrv.c
++++ b/runtime/tcpsrv.c
+@@ -604,7 +604,6 @@ doReceive(tcpsrv_t *pThis, tcps_sess_t **ppSess, nspoll_t *pPoll)
+ 	case RS_RET_CLOSED:
+ 		if(pThis->bEmitMsgOnClose) {
+ 			errno = 0;
+-			// prop.GetString((*ppSess)->fromHostIP, &pszPeer, &lenPeer);
+ 			LogError(0, RS_RET_PEER_CLOSED_CONN, "Netstream session %p closed by remote "
+ 				"peer %s.\n", (*ppSess)->pStrm, pszPeer);
+ 		}
+@@ -620,13 +619,11 @@ doReceive(tcpsrv_t *pThis, tcps_sess_t **ppSess, nspoll_t *pPoll)
+ 			/* in this case, something went awfully wrong.
+ 			 * We are instructed to terminate the session.
+ 			 */
+-			// prop.GetString((*ppSess)->fromHostIP, &pszPeer, &lenPeer);
+ 			LogError(oserr, localRet, "Tearing down TCP Session from %s", pszPeer);
+ 			CHKiRet(closeSess(pThis, ppSess, pPoll));
+ 		}
+ 		break;
+ 	default:
+-		// prop.GetString((*ppSess)->fromHostIP, &pszPeer, &lenPeer);
+ 		LogError(oserr, iRet, "netstream session %p from %s will be closed due to error",
+ 				(*ppSess)->pStrm, pszPeer);
+ 		CHKiRet(closeSess(pThis, ppSess, pPoll));
+-- 
+2.27.0
