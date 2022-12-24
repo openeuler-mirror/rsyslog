@@ -1,0 +1,98 @@
+From 2623a89a0c66cced8fc37ac1daa0da936005bad6 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Tue, 15 Nov 2022 15:11:50 +0100
+Subject: [PATCH] imtcp bugfix: legacy config directives did no longer work
+
+Many "$InputTCPServer..." config directives did no longer work
+and were completely ignored (e.g. "$InputTCPServerStreamDriverMode").
+
+This was a regression from a08591be5d9 (May, 5th 2021).
+
+closes https://github.com/rsyslog/rsyslog/issues/5021
+
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/2623a89a0c66cced8fc37ac1daa0da936005bad6
+---
+ plugins/imtcp/imtcp.c                   | 15 ++++++++++++++-
+ runtime/nsd_gtls.c                      |  3 ++-
+ tests/imtcp-tls-gtls-x509name-legacy.sh | 10 ++++++----
+ 3 files changed, 22 insertions(+), 6 deletions(-)
+
+diff --git a/plugins/imtcp/imtcp.c b/plugins/imtcp/imtcp.c
+index ccc99b0..e275750 100644
+--- a/plugins/imtcp/imtcp.c
++++ b/plugins/imtcp/imtcp.c
+@@ -446,6 +446,20 @@ static rsRetVal addInstance(void __attribute__((unused)) *pVal, uchar *pNewVal)
+ 		CHKmalloc(inst->pszInputName = ustrdup(cs.pszInputName));
+ 	}
+ 	inst->cnf_params->bSuppOctetFram = cs.bSuppOctetFram;
++	inst->iStrmDrvrMode = cs.iStrmDrvrMode;
++	inst->bKeepAlive = cs.bKeepAlive ;
++	inst->bUseFlowControl = cs.bUseFlowControl;
++	inst->bDisableLFDelim = cs.bDisableLFDelim;
++	inst->bEmitMsgOnClose = cs.bEmitMsgOnClose;
++	inst->bPreserveCase = cs.bPreserveCase;
++	inst->iKeepAliveProbes = cs.iKeepAliveProbes;
++	inst->iKeepAliveIntvl = cs.iKeepAliveIntvl;
++	inst->iKeepAliveTime = cs.iKeepAliveTime;
++	inst->iKeepAliveTime = cs.iKeepAliveTime;
++	inst->iAddtlFrameDelim = cs.iAddtlFrameDelim;
++	inst->iTCPLstnMax = cs.iTCPLstnMax;
++	inst->iTCPSessMax = cs.iTCPSessMax;
++	inst->iStrmDrvrMode = cs.iStrmDrvrMode;
+ 
+ finalize_it:
+ 	free(pNewVal);
+@@ -952,7 +966,6 @@ RunServerThread(void *myself)
+ {
+ 	tcpsrv_etry_t *const etry = (tcpsrv_etry_t*) myself;
+ 	rsRetVal iRet;
+-	dbgprintf("RGER: running ety %p\n", etry);
+ 	iRet = tcpsrv.Run(etry->tcpsrv);
+ 	if(iRet != RS_RET_OK) {
+ 		LogError(0, iRet, "imtcp: error while terminating server; rsyslog may hang on shutdown");
+diff --git a/runtime/nsd_gtls.c b/runtime/nsd_gtls.c
+index 65e492d..378febb 100644
+--- a/runtime/nsd_gtls.c
++++ b/runtime/nsd_gtls.c
+@@ -1430,12 +1430,13 @@ ENDobjDestruct(nsd_gtls)
+  * rgerhards, 2008-04-28
+  */
+ static rsRetVal
+-SetMode(nsd_t *pNsd, int mode)
++SetMode(nsd_t *const pNsd, const int mode)
+ {
+ 	DEFiRet;
+ 	nsd_gtls_t *pThis = (nsd_gtls_t*) pNsd;
+ 
+ 	ISOBJ_TYPE_assert((pThis), nsd_gtls);
++	dbgprintf("(tls) mode: %d\n", mode);
+ 	if(mode != 0 && mode != 1) {
+ 		LogError(0, RS_RET_INVALID_DRVR_MODE, "error: driver mode %d not supported by "
+ 				"gtls netstream driver", mode);
+diff --git a/tests/imtcp-tls-gtls-x509name-legacy.sh b/tests/imtcp-tls-gtls-x509name-legacy.sh
+index c2c9bdd..4e8878c 100755
+--- a/tests/imtcp-tls-gtls-x509name-legacy.sh
++++ b/tests/imtcp-tls-gtls-x509name-legacy.sh
+@@ -12,12 +12,14 @@ global(	defaultNetstreamDriverCAFile="'$srcdir/tls-certs/ca.pem'"
+ 
+ # NOTE: we intentionally use legacy statements here! This *IS* what we want to test!
+ $ModLoad ../plugins/imtcp/.libs/imtcp
++$DefaultNetstreamDriver gtls
+ $inputTcpserverStreamdriverPermittedPeer rsyslog-client
+ 
+-input(type="imtcp" port="0" listenPortFileName="'$RSYSLOG_DYNNAME'.tcpflood_port"
+-	StreamDriver.Name="gtls"
+-	StreamDriver.Mode="1"
+-	StreamDriver.AuthMode="x509/name")
++$InputTCPServerStreamDriverAuthMode x509/name
++$InputTCPServerStreamDriverPermittedPeer Log_Streaming_Client
++$InputTCPServerStreamDriverMode 1
++$InputTCPServerListenPortFile '$RSYSLOG_DYNNAME'.tcpflood_port
++$InputTCPServerRun 0
+ 
+ template(name="outfmt" type="string" string="%msg:F,58:2%\n")
+ :msg, contains, "msgnum:" action(	type="omfile" 
+-- 
+2.27.0
+
