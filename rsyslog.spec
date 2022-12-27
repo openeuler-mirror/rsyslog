@@ -527,10 +527,10 @@ done
 * Mon Mar 14 2022 wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-7
 - change startlimitburst spelling errors
 
-* Feb Mon 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-6
+* Mon Feb 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-6
 - Increase the limit on restart frequency
 
-* Feb Mon 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-5
+* Mon Feb 28 2022  wangkerong <wangkerong@h-partners.com> - 8.2110.0-5
 - update timezone when restart rsyslog
 
 * Wed Feb 23 2022  wuchaochao <wuchaochao4@huawei.com> - 8.2110.0-4
