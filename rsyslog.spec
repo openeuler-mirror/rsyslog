@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        12
+Release:        13
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -41,6 +41,11 @@ Patch6005:      backport-tcpsrv-do-not-decrease-number-of-to-be-processed-fds.pa
 Patch6006:      backport-imptcp-bugfix-worker-thread-starvation-on-extreme-tr.patch
 Patch6007:      backport-Fix-memory-leak-when-globally-de-initialize-GnuTLS.patch
 Patch6008:      backport-Fix-memory-leak-when-free-action-worker-data-table.patch 
+Patch6009:      backport-Fix-memory-leak-when-SetString.patch 
+Patch6010:      backport-core-bugfix-correct-local-host-name-after-config-processing.patch 
+Patch6011:      backport-core-bugfix-local-hostname-invalid-if-no-global-config-object-given.patch 
+Patch6012:      backport-Simplified-and-fixed-IPv4-digit-detection.patch 
+Patch6013:      backport-tcpsrv-cleanup-remove-commented-out-code.patch 
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -353,6 +358,18 @@ rm -f %{buildroot}%{_libdir}/rsyslog/liboverride_gethostname_nonfqdn.so
 %delete_la
 
 %pre
+# Delete file and package upgrades concurrently, Cause the upgrade to fail.
+# so, empty file instead of deleting file
+if [ -f /etc/cron.hourly/logrotate ];then
+    sed -i s/'^if[[:blank:]]*\[[[:blank:]]*-f[[:blank:]]*\/etc\/logrotate.d\/rsyslog[[:blank:]]*\];then$'/'if \[ -s \/etc\/logrotate.d\/rsyslog \];then'/g /etc/cron.hourly/logrotate
+    sed -i s/'^[[:blank:]]*rm[[:blank:]]*-f[[:blank:]]*\/etc\/logrotate.d\/rsyslog$'/'        > \/etc\/logrotate.d\/rsyslog'/g /etc/cron.hourly/logrotate
+    # Delay 2s, wait for /etc/cron.hourly/logrotate delete file execution to complete
+    sleep 2
+    if [ ! -f /etc/logrotate.d/rsyslog ]; then
+        touch  /etc/logrotate.d/rsyslog
+        chmod  644  /etc/logrotate.d/rsyslog
+    fi
+fi
 
 %post
 for n in /var/log/{messages,secure,maillog,spooler}
@@ -503,6 +520,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Sat Dec 17 2022 pengyi <pengyi37@huawei.com> - 8.2110.0-13
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC: backport patches from upstream
+
 * Thu Oct 13 2022 huangduirong <huangduirong@huawei.com> - 8.2110.0-12
 - Type:NA
 - ID:NA
