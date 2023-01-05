@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2110.0
-Release:        13
+Release:        14
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -46,6 +46,13 @@ Patch6010:      backport-core-bugfix-correct-local-host-name-after-config-proces
 Patch6011:      backport-core-bugfix-local-hostname-invalid-if-no-global-config-object-given.patch 
 Patch6012:      backport-Simplified-and-fixed-IPv4-digit-detection.patch 
 Patch6013:      backport-tcpsrv-cleanup-remove-commented-out-code.patch 
+Patch6014:      backport-add-support-for-permittedPeers-setting-at-input.patch 
+Patch6015:      backport-fix-memory-leak-in-afterRun-Code.patch 
+Patch6016:      backport-Terminate-all-tcpsrv-threads-properly.patch 
+Patch6017:      backport-Deallocate-outchannel-resources-in-rsconf-destructor.patch 
+Patch6018:      backport-Fix-Segmentation-fault-in-close-journal.patch 
+Patch6019:      backport-add-test-for-legacy-permittedPeer-statement.patch 
+Patch6020:      backport-imtcp-bugfix-legacy-config-directives-did-no-longer-work.patch 
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -520,6 +527,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Sat Dec 24 2022 pengyi <pengyi37@huawei.com> - 8.2110.0-14
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC: backport patches from upstream
+
 * Sat Dec 17 2022 pengyi <pengyi37@huawei.com> - 8.2110.0-13
 - Type:NA
 - ID:NA
