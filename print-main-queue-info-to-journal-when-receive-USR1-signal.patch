@@ -7,12 +7,14 @@ Signed-off-by: wangshouping <wangshouping@huawei.com>
 V-2: add macro control for systemd/sd-journal.h
 Signed-off-by: pengyi37 <pengyi37@huawei.com>
 
+V-3: adapt pMsgQueue to runConf->pMsgQueue
+Signed-off-by: pengyi37 <pengyi37@huawei.com>
 ---
- tools/rsyslogd.c | 19 ++++++++++++++++++-
- 1 file changed, 18 insertions(+), 1 deletion(-)
+ tools/rsyslogd.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/tools/rsyslogd.c b/tools/rsyslogd.c
-index f1eea07..657f4de 100644
+index 31b91a1..8be2032 100644
 --- a/tools/rsyslogd.c
 +++ b/tools/rsyslogd.c
 @@ -36,6 +36,7 @@
@@ -23,15 +25,15 @@ index f1eea07..657f4de 100644
  #endif
  
  #include "rsyslog.h"
-@@ -180,6 +181,7 @@ void rsyslogdDoDie(int sig);
- /* global data items */
- static int bChildDied;
+@@ -182,6 +183,7 @@ static pthread_mutex_t mutChildDied;
+ static int bChildDied = 0;
+ static pthread_mutex_t mutHadHUP;
  static int bHadHUP;
 +static int g_bRecordQueue;
  static int doFork = 1; 	/* fork - run in daemon mode - read-only after startup */
  int bFinished = 0;	/* used by termination signal handler, read-only except there
  			 * is either 0 or the number of the signal that requested the
-@@ -1269,8 +1271,13 @@ rsyslogdDebugSwitch(void)
+@@ -1294,8 +1296,13 @@ rsyslogdDebugSwitch(void)
  		dbgprintf("\n");
  		debugging_on = 0;
  	}
@@ -45,7 +47,7 @@ index f1eea07..657f4de 100644
  
  /* This is the main entry point into rsyslogd. Over time, we should try to
   * modularize it a bit more...
-@@ -1618,7 +1625,7 @@ initAll(int argc, char **argv)
+@@ -1629,7 +1636,7 @@ initAll(int argc, char **argv)
  		hdlr_enable(SIGINT,  rsyslogdDoDie);
  		hdlr_enable(SIGQUIT, rsyslogdDoDie);
  	} else {
@@ -54,30 +56,22 @@ index f1eea07..657f4de 100644
  		hdlr_enable(SIGINT,  SIG_IGN);
  		hdlr_enable(SIGQUIT, SIG_IGN);
  	}
-@@ -1956,6 +1963,7 @@ mainloop(void)
- 	sigaddset(&sigblockset, SIGTERM);
- 	sigaddset(&sigblockset, SIGCHLD);
- 	sigaddset(&sigblockset, SIGHUP);
-+	sigaddset(&sigblockset, SIGUSR1);
- 
- 	do {
- 		processImInternal();
-@@ -1970,6 +1978,15 @@ mainloop(void)
- 			doHUP();
- 			bHadHUP = 0;
+@@ -1997,6 +2004,15 @@ mainloop(void)
+ 		if(need_free_mutex) {
+ 			pthread_mutex_unlock(&mutHadHUP);
  		}
 +		if (g_bRecordQueue) {
-+			if (pMsgQueue != NULL) {
++			if(runConf->pMsgQueue != NULL) {
 +				sd_journal_print(LOG_NOTICE, "main queue size information: current QueueSize=%d MaxQueueSize=%d\n",
-+						pMsgQueue->iQueueSize, pMsgQueue->iMaxQueueSize);
++						runConf->pMsgQueue->iQueueSize, runConf->pMsgQueue->iMaxQueueSize);
 +			} else {
 +				sd_journal_print(LOG_NOTICE, "main queue size information: pMsgQueue is NULL!\n");
 +			}
 +			g_bRecordQueue = 0;
 +		}
  
- 		if(bFinished)
- 			break;	/* exit as quickly as possible */
+ 		processImInternal();
+ 
 -- 
 2.23.0
 

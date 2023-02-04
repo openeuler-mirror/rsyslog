@@ -6,8 +6,8 @@
 %define systemd_lived 1
 
 Name:           rsyslog
-Version:        8.2110.0
-Release:        14
+Version:        8.2210.0
+Release:        1
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -30,29 +30,9 @@ Patch9003:      rsyslog-8.37.0-initialize-variables-and-check-return-value.patch
 Patch9004:      print-main-queue-info-to-journal-when-queue-full.patch
 Patch9005:      print-main-queue-info-to-journal-when-receive-USR1-signal.patch
 %endif
-Patch9006:      bugfix-CVE-2022-24903.patch
-
-Patch6000:      backport-testbench-skip-omfwd_fast_imuxsock.sh-if-liblogging-stdlog-is-not-available.patch
-Patch6001:      backport-Fixes-4395-by-correctly-checking-for-EPIPE.patch
-Patch6002:      backport-rsyslogd-adjust-the-order-of-doHUP-and-processImInte.patch
-Patch6003:      backport-gnutls-bugfix-Fix-error-handling-in-gtlsRecordRecv.patch
-Patch6004:      backport-Fix-non-null-terminated-string-used-with-strlen.patch
-Patch6005:      backport-tcpsrv-do-not-decrease-number-of-to-be-processed-fds.patch
-Patch6006:      backport-imptcp-bugfix-worker-thread-starvation-on-extreme-tr.patch
-Patch6007:      backport-Fix-memory-leak-when-globally-de-initialize-GnuTLS.patch
-Patch6008:      backport-Fix-memory-leak-when-free-action-worker-data-table.patch 
-Patch6009:      backport-Fix-memory-leak-when-SetString.patch 
-Patch6010:      backport-core-bugfix-correct-local-host-name-after-config-processing.patch 
-Patch6011:      backport-core-bugfix-local-hostname-invalid-if-no-global-config-object-given.patch 
-Patch6012:      backport-Simplified-and-fixed-IPv4-digit-detection.patch 
-Patch6013:      backport-tcpsrv-cleanup-remove-commented-out-code.patch 
-Patch6014:      backport-add-support-for-permittedPeers-setting-at-input.patch 
-Patch6015:      backport-fix-memory-leak-in-afterRun-Code.patch 
-Patch6016:      backport-Terminate-all-tcpsrv-threads-properly.patch 
-Patch6017:      backport-Deallocate-outchannel-resources-in-rsconf-destructor.patch 
-Patch6018:      backport-Fix-Segmentation-fault-in-close-journal.patch 
-Patch6019:      backport-add-test-for-legacy-permittedPeer-statement.patch 
-Patch6020:      backport-imtcp-bugfix-legacy-config-directives-did-no-longer-work.patch 
+ 
+Patch6000:      backport-core-bugfix-local-hostname-invalid-if-no-global-config-object-given.patch 
+Patch6001:      backport-imtcp-bugfix-legacy-config-directives-did-no-longer-work.patch 
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -527,6 +507,12 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Sat Feb 4 2023 pengyi <pengyi37@huawei.com> - 8.2210.0-1
+- Type:NA
+- ID:NA
+- SUG:NA
+- DESC: update to 8.2210 version
+
 * Sat Dec 24 2022 pengyi <pengyi37@huawei.com> - 8.2110.0-14
 - Type:NA
 - ID:NA
