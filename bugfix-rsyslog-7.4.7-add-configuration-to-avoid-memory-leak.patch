@@ -1,11 +1,16 @@
-From 71e9b4eda329fc9e59fbbcdc86353a7609f8d383 Mon Sep 17 00:00:00 2001
+From 71e9b4eda329fc9e59fbbcdc86353a7690f8d383 Mon Spe 17 00:00:00 2001
 From: guoxiaoqi <guoxiaoqi2@huawei.com>
 Date: Tue, 26 Feb 2019 23:33:08 +0000
-Subject: [PATCH] add configuration to avoid memory leak for bugfix of rsyslog-7.4.7
+Subject: [PATCH] bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak
 
-reason: add configuration to avoid memory leak for bugfix of rsyslog-7.4.7
+reason: add configuration to avoid memory leak for bugfix of rsyslog-7.4.7i
+---
+From a633ee629468562499ead31e26c8dfca5a5f3293 Mon Sep 17 00:00:00 2001
+From: pengyi <pengyi37@huawei.com>
+Date: Fri, 3 Feb 2023 15:26:23 +0800
+Subject: [PATCH] bugfix-rsyslog-7.4.7-add-configuration-to-avoid-memory-leak
 
-Signed-off-by: guoxiaoqi <guoxiaoqi2@huawei.com>
+V-2: adapt due to line mismatch
 ---
  action.c        |  7 ++++++-
  runtime/queue.c | 30 +++++++++++++++++++++++++++++-
@@ -13,10 +18,10 @@ Signed-off-by: guoxiaoqi <guoxiaoqi2@huawei.com>
  3 files changed, 37 insertions(+), 2 deletions(-)
 
 diff --git a/action.c b/action.c
-index 1bc0ad2..e973f72 100644
+index 4c3b581..4fa53ed 100644
 --- a/action.c
 +++ b/action.c
-@@ -174,6 +174,7 @@ typedef struct configSettings_s {
+@@ -176,6 +176,7 @@ typedef struct configSettings_s {
  	int iActionQWrkMinMsgs;				/* minimum messages per worker needed to start a new one */
  	int bActionQSaveOnShutdown;			/* save queue on shutdown (when DA enabled)? */
  	int64 iActionQueMaxDiskSpace;			/* max disk space allocated 0 ==> unlimited */
@@ -24,7 +29,7 @@ index 1bc0ad2..e973f72 100644
  	int iActionQueueDeqSlowdown;			/* dequeue slowdown (simple rate limiting) */
  	int iActionQueueDeqtWinFromHr;			/* hour begin of time frame when queue is to be dequeued */
  	int iActionQueueDeqtWinToHr;			/* hour begin of time frame when queue is to be dequeued */
-@@ -309,7 +310,8 @@ actionResetQueueParams(void)
+@@ -303,7 +304,8 @@ actionResetQueueParams(void)
  	cs.iActionQtoWrkShutdown = 60000;		/* timeout for worker thread shutdown */
  	cs.iActionQWrkMinMsgs = -1;			/* minimum messages per worker needed to start a new one */
  	cs.bActionQSaveOnShutdown = 1;			/* save queue on shutdown (when DA enabled)? */
@@ -34,7 +39,7 @@ index 1bc0ad2..e973f72 100644
  	cs.iActionQueueDeqSlowdown = 0;
  	cs.iActionQueueDeqtWinFromHr = 0;
  	cs.iActionQueueDeqtWinToHr = 25;		/* 25 disables time windowed dequeuing */
-@@ -543,6 +545,7 @@ actionConstructFinalize(action_t *__restrict__ const pThis, struct nvlst *lst)
+@@ -539,6 +541,7 @@ actionConstructFinalize(action_t *__restrict__ const pThis, struct nvlst *lst)
  				error %d. Ignored, running with default setting", iRet); \
  		}
  		setQPROP(qqueueSetsizeOnDiskMax, "$ActionQueueMaxDiskSpace", cs.iActionQueMaxDiskSpace);
@@ -42,7 +47,7 @@ index 1bc0ad2..e973f72 100644
  		setQPROP(qqueueSetiDeqBatchSize, "$ActionQueueDequeueBatchSize", cs.iActionQueueDeqBatchSize);
  		setQPROP(qqueueSetMaxFileSize, "$ActionQueueFileSize", cs.iActionQueMaxFileSize);
  		setQPROPstr(qqueueSetFilePrefix, "$ActionQueueFileName", cs.pszActionQFName);
-@@ -2229,6 +2232,8 @@ rsRetVal actionClassInit(void)
+@@ -2318,6 +2321,8 @@ rsRetVal actionClassInit(void)
  		&cs.iActionQueueDeqBatchSize, NULL));
  	CHKiRet(regCfSysLineHdlr((uchar *)"actionqueuemaxdiskspace", 0, eCmdHdlrSize, NULL,
  		&cs.iActionQueMaxDiskSpace, NULL));
@@ -52,7 +57,7 @@ index 1bc0ad2..e973f72 100644
  		&cs.iActionQHighWtrMark, NULL));
  	CHKiRet(regCfSysLineHdlr((uchar *)"actionqueuelowwatermark", 0, eCmdHdlrInt, NULL,
 diff --git a/runtime/queue.c b/runtime/queue.c
-index 23de366..0c2485c 100644
+index bd3fb8e..de9c619 100644
 --- a/runtime/queue.c
 +++ b/runtime/queue.c
 @@ -46,6 +46,7 @@
@@ -63,7 +68,7 @@ index 23de366..0c2485c 100644
  
  #include "rsyslog.h"
  #include "queue.h"
-@@ -125,6 +126,7 @@ static struct cnfparamdescr cnfpdescr[] = {
+@@ -115,6 +116,7 @@ static struct cnfparamdescr cnfpdescr[] = {
  	{ "queue.mindequeuebatchsize", eCmdHdlrInt, 0 },
  	{ "queue.mindequeuebatchsize.timeout", eCmdHdlrInt, 0 },
  	{ "queue.maxdiskspace", eCmdHdlrSize, 0 },
@@ -71,7 +76,7 @@ index 23de366..0c2485c 100644
  	{ "queue.highwatermark", eCmdHdlrInt, 0 },
  	{ "queue.lowwatermark", eCmdHdlrInt, 0 },
  	{ "queue.fulldelaymark", eCmdHdlrInt, 0 },
-@@ -472,6 +474,7 @@ StartDA(qqueue_t *pThis)
+@@ -464,6 +466,7 @@ StartDA(qqueue_t *pThis)
  
  	CHKiRet(qqueueSetpAction(pThis->pqDA, pThis->pAction));
  	CHKiRet(qqueueSetsizeOnDiskMax(pThis->pqDA, pThis->sizeOnDiskMax));
@@ -79,7 +84,7 @@ index 23de366..0c2485c 100644
  	CHKiRet(qqueueSetiDeqSlowdown(pThis->pqDA, pThis->iDeqSlowdown));
  	CHKiRet(qqueueSetMaxFileSize(pThis->pqDA, pThis->iMaxFileSize));
  	CHKiRet(qqueueSetFilePrefix(pThis->pqDA, pThis->pszFilePrefix, pThis->lenFilePrefix));
-@@ -1016,6 +1019,20 @@ qAddDisk(qqueue_t *const pThis, smsg_t* pMsg)
+@@ -1019,6 +1022,20 @@ qAddDisk(qqueue_t *const pThis, smsg_t* pMsg)
  	ISOBJ_TYPE_assert(pMsg, msg);
  	number_t nWriteCount;
  	const int oldfile = strmGetCurrFileNum(pThis->tVars.disk.pWrite);
@@ -100,7 +105,7 @@ index 23de366..0c2485c 100644
  
  	CHKiRet(strm.SetWCntr(pThis->tVars.disk.pWrite, &nWriteCount));
  	CHKiRet((objSerialize(pMsg))(pMsg, pThis->tVars.disk.pWrite));
-@@ -1047,6 +1064,13 @@ qAddDisk(qqueue_t *const pThis, smsg_t* pMsg)
+@@ -1050,6 +1067,13 @@ qAddDisk(qqueue_t *const pThis, smsg_t* pMsg)
  	}
  
  finalize_it:
@@ -114,8 +119,8 @@ index 23de366..0c2485c 100644
  	RETiRet;
  }
  
-@@ -1544,7 +1568,8 @@ qqueueSetDefaultsActionQueue(qqueue_t *pThis)
- 	pThis->toWrkShutdown = actq_dflt_toWrkShutdown;	/* timeout for worker thread shutdown */
+@@ -1546,7 +1570,8 @@ qqueueSetDefaultsActionQueue(qqueue_t *pThis)
+ 	pThis->toWrkShutdown = loadConf->globals.actq_dflt_toWrkShutdown;	/* timeout for worker thread shutdown */
  	pThis->iMinMsgsPerWrkr = -1;		/* minimum messages per worker needed to start a new one */
  	pThis->bSaveOnShutdown = 1;		/* save queue on shutdown (when DA enabled)? */
 -	pThis->sizeOnDiskMax = 0;		/* unlimited */
@@ -124,7 +129,7 @@ index 23de366..0c2485c 100644
  	pThis->iDeqSlowdown = 0;
  	pThis->iDeqtWinFromHr = 0;
  	pThis->iDeqtWinToHr = 25;		 /* disable time-windowed dequeuing by default */
-@@ -3355,6 +3380,8 @@ qqueueApplyCnfParam(qqueue_t *pThis, struct nvlst *lst)
+@@ -3401,6 +3426,8 @@ qqueueApplyCnfParam(qqueue_t *pThis, struct nvlst *lst)
  			pThis->toMinDeqBatchSize = pvals[i].val.d.n;
  		} else if(!strcmp(pblk.descr[i].name, "queue.maxdiskspace")) {
  			pThis->sizeOnDiskMax = pvals[i].val.d.n;
@@ -133,7 +138,7 @@ index 23de366..0c2485c 100644
  		} else if(!strcmp(pblk.descr[i].name, "queue.highwatermark")) {
  			pThis->iHighWtrMrk = pvals[i].val.d.n;
  		} else if(!strcmp(pblk.descr[i].name, "queue.lowwatermark")) {
-@@ -3455,6 +3482,7 @@ DEFpropSetMeth(qqueue, iDeqBatchSize, int)
+@@ -3555,6 +3582,7 @@ DEFpropSetMeth(qqueue, iDeqBatchSize, int)
  DEFpropSetMeth(qqueue, iMinDeqBatchSize, int)
  DEFpropSetMeth(qqueue, sizeOnDiskMax, int64)
  DEFpropSetMeth(qqueue, iSmpInterval, int)
@@ -142,10 +147,10 @@ index 23de366..0c2485c 100644
  
  /* This function can be used as a generic way to set properties. Only the subset
 diff --git a/runtime/queue.h b/runtime/queue.h
-index 5f91c58..f01c325 100644
+index dd989bd..2264f08 100644
 --- a/runtime/queue.h
 +++ b/runtime/queue.h
-@@ -143,6 +143,7 @@ struct queue_s {
+@@ -144,6 +144,7 @@ struct queue_s {
  	int iNumberFiles;	/* how many files make up the queue? */
  	int64 iMaxFileSize;	/* max size for a single queue file */
  	int64 sizeOnDiskMax;    /* maximum size on disk allowed */
@@ -153,7 +158,7 @@ index 5f91c58..f01c325 100644
  	qDeqID deqIDAdd;	/* next dequeue ID to use during add to queue store */
  	qDeqID deqIDDel;	/* queue store delete position */
  	int bIsDA;		/* is this queue disk assisted? */
-@@ -233,6 +234,7 @@ PROTOTYPEpropSetMeth(qqueue, bSaveOnShutdown, int);
+@@ -237,6 +238,7 @@ PROTOTYPEpropSetMeth(qqueue, bSaveOnShutdown, int);
  PROTOTYPEpropSetMeth(qqueue, pAction, action_t*);
  PROTOTYPEpropSetMeth(qqueue, iDeqSlowdown, int);
  PROTOTYPEpropSetMeth(qqueue, sizeOnDiskMax, int64);
@@ -162,5 +167,5 @@ index 5f91c58..f01c325 100644
  #define qqueueGetID(pThis) ((unsigned long) pThis)
  
 -- 
-2.19.1
+2.23.0
 
