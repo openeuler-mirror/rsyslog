@@ -7,7 +7,7 @@
 
 Name:           rsyslog
 Version:        8.2210.0
-Release:        1
+Release:        2
 Summary:        The rocket-fast system for log processing
 License:        (GPLv3+ and ASL 2.0)
 URL:            http://www.rsyslog.com/
@@ -32,7 +32,9 @@ Patch9005:      print-main-queue-info-to-journal-when-receive-USR1-signal.patch
 %endif
  
 Patch6000:      backport-core-bugfix-local-hostname-invalid-if-no-global-config-object-given.patch 
-Patch6001:      backport-imtcp-bugfix-legacy-config-directives-did-no-longer-work.patch 
+Patch6001:      backport-imtcp-bugfix-legacy-config-directives-did-no-longer-work.patch
+Patch6002:      backport-core-bugfix-template-system-may-generate-invalid-json.patch
+Patch6003:      backport-omprog-bugfix-invalid-status-handling-at-called-prog.patch
 
 BuildRequires:  gcc autoconf automake bison dos2unix flex pkgconfig python3-docutils libtool
 BuildRequires:  libgcrypt-devel libuuid-devel zlib-devel krb5-devel libnet-devel gnutls-devel
@@ -507,6 +509,13 @@ done
 %{_mandir}/man1/rscryutil.1.gz
 
 %changelog
+* Tue Apr 4 2023 pengyi <pengyi37@huawei.com> - 8.2210.0-2
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:omprog bugfix: invalid status handling at called program
+       core bugfix: template system may generate invalid json
+
 * Sat Feb 4 2023 pengyi <pengyi37@huawei.com> - 8.2210.0-1
 - Type:NA
 - ID:NA
