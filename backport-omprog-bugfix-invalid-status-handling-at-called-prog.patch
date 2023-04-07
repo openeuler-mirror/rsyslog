@@ -1,0 +1,47 @@
+From 1128d320750fb6cfe57b8ad53ef1d5ddf80c81cf Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Sun, 4 Dec 2022 16:05:22 +0100
+Subject: [PATCH] omprog bugfix: invalid status handling at called program
+ 
+There is a bug when external program *startup* does not return "OK". This
+can also lead to a misadressing with potentially a segfault (very unlikely).
+Note that no problem exists once the initializiation phase of the external
+program is finished and regular message transfer runs.
+ 
+The problem basically is that for a startup failure, the control data for
+that external program instance is freed on error. Unfortunately, that state
+data is needed later on to detect a suspended instance. We now keep the control
+data even on init failure (as we then need to do normal control options).
+ 
+closes https://github.com/rsyslog/rsyslog/issues/4967
+---
+Conflict:NA
+Reference:https://github.com/rsyslog/rsyslog/commit/1128d320750fb6cfe57b8ad53ef1d5ddf80c81cf
+---
+ plugins/omprog/omprog.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+ 
+diff --git a/plugins/omprog/omprog.c b/plugins/omprog/omprog.c
+index 4f46f92..dd83e93 100644
+--- a/plugins/omprog/omprog.c
++++ b/plugins/omprog/omprog.c
+@@ -379,6 +379,7 @@ cleanupChild(instanceData *pData, childProcessCtx_t *pChildCtx)
+ static void
+ terminateChild(instanceData *pData, childProcessCtx_t *pChildCtx)
+ {
++	DBGPRINTF("terminateChild called\n");
+ 	assert(pChildCtx->bIsRunning);
+ 
+ 	if (pData->bSignalOnClose) {
+@@ -927,9 +928,6 @@ CODESTARTcreateWrkrInstance
+ 	}
+ 
+ finalize_it:
+-	if(iRet != RS_RET_OK && !pWrkrData->pData->bForceSingleInst) {
+-		free(pWrkrData->pChildCtx);
+-	}
+ ENDcreateWrkrInstance
+ 
+ 
+-- 
+2.27.0
